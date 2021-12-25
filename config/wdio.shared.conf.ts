@@ -46,7 +46,7 @@ export const config: WebdriverIO.Config = {
     // Define all options that are relevant for the WebdriverIO instance here
     //
     // Level of logging verbosity: trace | debug | info | warn | error | silent
-    logLevel: 'silent',
+    // logLevel: 'silent',
     // Set specific log levels per logger
     // loggers:
     // - webdriver, webdriverio
@@ -56,10 +56,10 @@ export const config: WebdriverIO.Config = {
     // - @wdio/sumologic-reporter
     // - @wdio/cli, @wdio/config, @wdio/utils
     // Level of logging verbosity: trace | debug | info | warn | error | silent
-    // logLevels: {
-    //     webdriver: 'info',
-    //     '@wdio/applitools-service': 'info'
-    // },
+    logLevels: {
+        webdriver: 'info',
+         '@wdio/applitools-service': 'info'
+    },
     //
     // If you only want to run your tests until a specific amount of tests have failed use
     // bail (default is 0 - don't bail, run all tests).
@@ -68,7 +68,7 @@ export const config: WebdriverIO.Config = {
     // with `/`, the base url gets prepended, not including the path portion of your baseUrl.
     // If your `url` parameter starts without a scheme or `/` (like `some/path`), the base url
     // gets prepended directly.
-    baseUrl: 'http://the-internet.herokuapp.com',
+    baseUrl: 'http://localhost:4723/wd/hub/'
     // Default timeout for all waitFor* commands.
     /**
      * NOTE: This has been increased for more stable Appium Native app
