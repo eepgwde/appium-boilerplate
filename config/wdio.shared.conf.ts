@@ -68,7 +68,7 @@ export const config: WebdriverIO.Config = {
     // with `/`, the base url gets prepended, not including the path portion of your baseUrl.
     // If your `url` parameter starts without a scheme or `/` (like `some/path`), the base url
     // gets prepended directly.
-    baseUrl: 'http://localhost:4723/wd/hub/'
+    baseUrl: 'http://localhost:4723/wd/hub/',
     // Default timeout for all waitFor* commands.
     /**
      * NOTE: This has been increased for more stable Appium Native app
