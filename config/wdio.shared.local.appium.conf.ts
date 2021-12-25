@@ -4,27 +4,14 @@ import { config } from './wdio.shared.conf';
 // ======
 // Appium
 // ======
-//
-config.services = (config.services ? config.services : []).concat([
-    [
-        'appium',
-        {
-            // This will use the globally installed version of Appium
-            command: 'appium',
-            args: {
-                // This is needed to tell Appium that we can execute local ADB commands
-                // and to automatically download the latest version of ChromeDriver
-                relaxedSecurity: true,
-            },
-        },
-
-    ],
-]);
-//
+// Don't start Appium in the test suite.
 // =====================
 // Server Configurations
 // =====================
 //
-config.port = 4723;
+// config.port = 4723;
+// config.hostname = 'localhost';
+// config.port = 4444;
+// config.path = '/wd/hub';
 
 export default config;

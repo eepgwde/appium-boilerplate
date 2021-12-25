@@ -11,6 +11,9 @@ export const config: WebdriverIO.Config = {
     // WebdriverIO allows it to run your tests in arbitrary locations (e.g. locally or
     // on a remote machine).
     runner: 'local',
+    hostname: 'localhost',
+    port: 4723,
+    path: '/wd/hub/',
     //
     // ==================
     // Specify Test Files
@@ -90,7 +93,8 @@ export const config: WebdriverIO.Config = {
     // - wdio.shared.local.appium.conf.ts
     // - wdio.shared.sauce.conf.ts
     // configuration files
-    services: [],
+    services: [
+    ],
     // Framework you want to run your specs with.
     // The following are supported: Mocha, Jasmine, and Cucumber
     // see also: https://webdriver.io/docs/frameworks
