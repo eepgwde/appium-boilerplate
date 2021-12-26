@@ -11,7 +11,6 @@ import { config } from './wdio.shared.conf';
 //
 // config.port = 4723;
 // config.hostname = 'localhost';
-// config.port = 4444;
 // config.path = '/wd/hub';
 
 export default config;

@@ -59,10 +59,10 @@ export const config: WebdriverIO.Config = {
     // - @wdio/sumologic-reporter
     // - @wdio/cli, @wdio/config, @wdio/utils
     // Level of logging verbosity: trace | debug | info | warn | error | silent
-    logLevels: {
-        webdriver: 'info',
-         '@wdio/applitools-service': 'info'
-    },
+    logLevel: 'debug',
+    logLevels: { webdriver: 'trace' },
+    //    webdriverio: 'debug',
+    // },
     //
     // If you only want to run your tests until a specific amount of tests have failed use
     // bail (default is 0 - don't bail, run all tests).
@@ -82,7 +82,7 @@ export const config: WebdriverIO.Config = {
     // if browser driver or grid doesn't send response
     connectionRetryTimeout: 120000,
     // Default request retries count
-    connectionRetryCount: 3,
+    connectionRetryCount: 1,
     // Test runner services
     // Services take over a specific job you don't want to take care of. They enhance
     // your test setup with almost no effort. Unlike plugins, they don't add new
@@ -122,7 +122,8 @@ export const config: WebdriverIO.Config = {
          * NOTE: This has been increased for more stable Appium Native app
          * tests because they can take a bit longer.
          */
-        timeout: 3 * 60 * 1000, // 3min
+        // timeout: 3 * 60 * 1000, // 3min
+        timeout: 0, // 3min
     },
     //
     // =====
@@ -136,5 +137,8 @@ export const config: WebdriverIO.Config = {
     /**
      * NOTE: No Hooks are used in this project, but feel free to add them if you need them.
      */
+    onWorkerStart: function (cid, caps, specs, args, execArgv) {
+        console.log('starting up')
+    }
 };
 
