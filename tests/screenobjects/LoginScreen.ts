@@ -1,5 +1,7 @@
 import AppScreen from './AppScreen';
 import Gestures from '../helpers/Gestures';
+import {Local} from "../helpers/Actions0";
+import Actions0 = Local.Actions0;
 
 class LoginScreen extends AppScreen {
     constructor () {
@@ -74,21 +76,18 @@ class LoginScreen extends AppScreen {
     }
 
     async submitLoginForm1({ username, password }:{username:string; password:string;}) {
+	let u0 = new Actions0(username)
+	let p0 = new Actions0(password)
+
         await this.email.click();
+        // await this.keys2("ab")
+        await driver.performActions(u0.value);
 
-        await this.keys2(username)
-
-        await browser.debug()
-
-        await browser.keys(['a'])
-        await browser.keys(['b'])
-
-        await browser.keys(username);
+        // Add a pause, just to make sure the drag and drop is done
+        await driver.pause(1000);
 
         await this.password.click();
-
-        await browser.keys(password)
-
+        await driver.performActions(p0.value);
 
         if (await driver.isKeyboardShown()) {
             /**
