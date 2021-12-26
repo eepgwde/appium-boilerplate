@@ -106,7 +106,7 @@ class LoginScreen extends AppScreen {
 
         // On smaller screens there could be a possibility that the button is not shown
         await Gestures.checkIfDisplayedWithSwipeUp(await this.loginButton, 2);
-        // await this.loginButton.click();
+        await this.loginButton.click();
 
     }
 
