@@ -23,9 +23,9 @@ export default class TabBar {
         await $('~Drag').click();
     }
 
-    static async waitForTabBarShown ():Promise<boolean|void> {
+    static async waitForConsent ():Promise<boolean|void> {
         return $('~Home').waitForDisplayed({
-            timeout: 20000,
+            timeout: 5000,
         });
     }
 }
