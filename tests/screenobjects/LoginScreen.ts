@@ -3,6 +3,16 @@ import Gestures from '../helpers/Gestures';
 import {Local} from "../helpers/Source0";
 import Actions0 = Local.Actions0;
 
+/**
+ * The login screen.
+ *
+ * It has some radioButtons on display. The one that has text matching a string is success.
+ *
+ * Then it clicks on, and fills email, then clicks on password and fills that.
+ * The fills operations are performActions.
+ *
+ * The method used is submitLoginForm1()
+ */
 class LoginScreen extends AppScreen {
     constructor () {
         super('id=canvasm.myo2:id/login_feature_manager_container');
@@ -98,6 +108,11 @@ class LoginScreen extends AppScreen {
         await this.loginButton.click();
     }
 
+    /**
+     * Unused.
+     * @param username
+     * @param password
+     */
     async submitSignUpForm({ username, password }:{username:string; password:string;}) {
         await this.email.setValue(username);
         await this.password.setValue(password);
@@ -141,4 +156,5 @@ class LoginScreen extends AppScreen {
     }
 }
 
+// This forces a Singleton.
 export default new LoginScreen();

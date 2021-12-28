@@ -16,3 +16,13 @@ apps/
 *.log
 chromeDriver
 .tmp
+
+pages/
+session.json-id
+
+\#*
+.#*
+*~
+
+docs/my-*
+

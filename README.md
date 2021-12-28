@@ -1,3 +1,76 @@
+# Stop Press
+
+weaves
+
+## Changes
+
+The keys() method from WebDriverIO does not work on Appium. It may not be a W3C response.
+This system now has a full W3C Actions key, KeyUp, KeyDown implementation.
+
+It will also snapshot pages to a directory ./pages/ on AppScreen.source().dump()
+
+Many of the test files in spec3/ are now long sequences to get to points in the app for testing.
+
+The user is now a tester who is logging pages and input.
+
+This system interworks with https://github.com/eepgwde/robottestilo the Bash hlpr.sh for Android on
+Cygwin or Linux.
+
+## Direction
+
+The JavaScript system is used as a configuration tool for the Java/Cucumber system delivering to Jenkins.
+
+I want to use this system like a test console onto the App. Currently,
+the file
+
+  tests/specs3/app.login.spec.ts
+
+has the best test sequence. From a fullReset, this presents the
+Consent page, dismisses that, and logs on.
+
+After all that, it does nothing but drop into the debugger, invoked with
+
+   await browser.debug
+
+This is not a good debugger. It is terminal line.
+
+   .help
+   .exit
+
+The browser can have customCommand() added to it.
+
+## To Do
+
+In the debugger, I want to get access to Source0.dump() and other things.
+
+I particularly want to use it for keyboard input.
+
+It then uses the Actions0 class to fulfil the performActions() method. You can then construct
+sequences in JavaScript.
+
+In the debugger, you want to do this:
+
+ 	let u0 = new Actions0(username)
+	let p0 = new Actions0(password)
+
+        await this.email.click();
+        // await this.keys2("ab") is the simple version of Actions0()
+        await driver.performActions(u0.value);
+        await this.password.click();
+        await driver.performActions(p0.value);
+
+The debugger does gives you access to the resolver
+
+  const l1 = $('id=canvasm.myo2:id/layout_login')
+  const mesg = await l1.getAttribute("text")
+  if (mesg == "green")
+
+In the function Consent.waitForConsent() this returns a promise, which
+has been used. It was used to check if a tag was present on the
+ConsentPage, and, if it was, then it would click the penultimate
+second-from-last clickable on the screen.
+
+
 # appium-boilerplate
 
 > **NOTE:**
