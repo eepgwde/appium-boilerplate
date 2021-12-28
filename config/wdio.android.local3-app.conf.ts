@@ -5,7 +5,7 @@ import config from './wdio.shared.local.appium.conf';
 // Specs
 // ============
 config.specs = [
-    './tests/specs2/app.*.spec.ts',
+    './tests/specs3/app.*.spec.ts',
 ];
 
 // ============
@@ -28,12 +28,13 @@ config.capabilities = [
         'appium:orientation': 'PORTRAIT',
         'appium:automationName': 'UiAutomator2',
         // The path to the app
-        'appium:app': join(process.cwd(), './apps/Android-NativeDemoApp-0.4.0.apk'),
+        'appium:app': 'D:\\weaves\\Documents\\cache\\Mein_o2.apk',
         // @ts-ignore
         'appium:appWaitActivity': 'com.wdiodemoapp.MainActivity',
         // Read the reset strategies very well, they differ per platform, see
         // http://appium.io/docs/en/writing-running-appium/other/reset-strategies/
         'appium:noReset': true,
+        'appium:fullReset': false,
         'appium:newCommandTimeout': 0,
     },
 ];

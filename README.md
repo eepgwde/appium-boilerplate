@@ -2,74 +2,238 @@
 
 weaves
 
+Appium testing on Cygwin for Android with W3C WebDriverIO
+
 ## Changes
 
-The keys() method from WebDriverIO does not work on Appium. It may not be a W3C response.
-This system now has a full W3C Actions key, KeyUp, KeyDown implementation.
+### Tester Tools
 
-It will also snapshot pages to a directory ./pages/ on AppScreen.source().dump()
+The keys() method does not work on W3C servers, one must use
+performActions(). I have added a class Actions0 to do the
+formating. This now has a full W3C Actions key, KeyUp, KeyDown
+implementation.
 
-Many of the test files in spec3/ are now long sequences to get to points in the app for testing.
+It will also snapshot the XML pages to a directory ./pages/ on AppScreen.source().dump()
+It will also take an image capture of the screen.
+The debugger has been extended and can return a programmatic page object that can be interacted with.
 
-The user is now a tester who is logging pages and input.
+Many of the test files in specs{2,3}/ are now long sequences to get to points in the app for testing.
+
+The user is now a tester who is logging pages, images and input.
 
 This system interworks with https://github.com/eepgwde/robottestilo the Bash hlpr.sh for Android on
 Cygwin or Linux.
 
-## Direction
+### Processes for Testers
 
-The JavaScript system is used as a configuration tool for the Java/Cucumber system delivering to Jenkins.
+This JavaScript/Mocha system is used as a configuration tool for the
+Java/Cucumber system delivering to Jenkins. We are still in the prototyping phase for the
+test software, so we use a prototyping tool.
 
-I want to use this system like a test console onto the App. Currently,
-the file
+There are practical advantages to using JavaScript and Mocha. The
+webdriver is wholly async in this implemenation, timeouts can be
+adjusted and the Mocha test system is a programmable environment, so
+conditional processing is possible. In particular, a time-out can be
+captured in a try-catch and ignored.
 
-  tests/specs3/app.login.spec.ts
+The goal is to provide a way that a Tester can record a Scenario and
+App Process Flow within the App.
 
-has the best test sequence. From a fullReset, this presents the
-Consent page, dismisses that, and logs on.
+The Tester should use the automated Logon process provided by the
+Mocha specs2/app.login.spec.ts
 
-After all that, it does nothing but drop into the debugger, invoked with
+At the end of the sequence, he is forced into the debugger, in which
+he can:
+
+  - Capture the current page with browser.getSignature()
+  - Send and record keyboard input to the App with browser.performActions()
+  - Send and record click on elements with await $().click()
+  - Search for screen elements with the selectors $() and $$()
+
+Try and record any interactions with the App using the debugger. In
+particular, the click() operations.
+
+The Appium session held in the debugger can be joined. You can use the
+Appium Inspector and "Attach to Session" and the recorder can be used
+to capture the XPath locations of the click operations.
+
+#### Running the Test System
+
+This system provides a test console onto the App. The system can be
+used like this:
+
+  rlwrap npx wdio run config/wdio.android.local2-app.conf.ts  --test app.login.spec.ts
+
+this config/ file uses the specs2/ directory and sets the reset rules as fullReset.
+
+The use of "rlwrap" is not necessary. It is added to provide a better
+line editor for the debugger and can perform logging.
+
+The script specs2/app.login.spec.ts has a simple sequence that
+succeeds from a fullReset, it will dismiss the Consent page, and then
+logs on, views the homepage and goes into the debugger. It uses this
+invocation to do that.
 
    await browser.debug
 
-This is not a good debugger. It is terminal line.
+It can be used anywhere in the JavaScript and Mocha test source.
+
+##### Using the editor: rlwrap
+
+rlwrap provides emacs-like editing for the debugger. Ctrl-p for
+previous command, Ctrl-n for next. Arrows work.  Ctrl-a is beginning
+of the line, Ctrl-e is the end-of-line. Some basic commands are:
 
    .help
    .exit
 
-The browser can have customCommand() added to it.
+rlwrap has history and can log its input and output with -l so this
+
+  rlwrap -l make.log npx wdio run config/wdio.android.local2-app.conf.ts  --test app.login.spec.ts
+
+is my typical run. All of the console logging goes to make.log with the terminal session.
+
+##### Extra Browser Operations
+
+The browser object is accessible in the debugger just as in the main
+source using the variable name "browser".  The debugger command line
+also supports $() and $$() for selectors. And it can perform basic
+JavaScript, it cannot import.
+
+The browser has had some custom commands added - see customCommand in the source for webdriverio.
+
+ - actions0
+ - getSignature
+
+I have tried, it is not possible to pass an object from the test
+system into the debugger. (I had tried to get a new NewPage(), but
+just {} appeared.)
+
+ $ let u0 = browser.actions0("username").value
+
+Returns an Actions0 object of the string "username" for use in a later call 
+
+ $ browser.performActions(u0)
+
+Also, it is possible to snapshot the current page with this
+
+ $ browser.getSignature(descr) // where descr: string
+
+The pages/ directory receives a file called w<hashcode>.xml{,1,2}
+The hashcode used in the filename is the hexadecimal hashcode of the string of the XML page.
+The descriptive string "state of app" can be added as needed.
+
+The .xml file has the page. The .xml1 file has the hashcode and the
+signature. The .xml2 file has a base64 encoded image of the screen
+when the snapshot was made.
+
+Every time getSignature() is invoked, a file session.json-id is updated. This can be used by
+the "hlpr" script as its session identifier if needed.
+
+#### Using the Page output for Debugger Actions
+
+If you have access to the hlpr.sh script, you can use it whilst in the debugger.
+
+If you have set up "hlpr" as described, it will be in the ./android0/
+directory. Make a soft link to bring the pages directory into the
+android directory.
+
+At the end of specs2/app.login.spec.ts, you should be in the debugger
+in one shell and at the command-line in the android0 directory.
+
+ hlpr xml text
+
+And there is button there:
+
+ page.bttn.resource-id=canvasm.myo2:id/my_tariff_tile_details_btn
+
+Take the string "id=canvasm.myo2:id/my_tariff_tile_details_btn" and use it in the debugger
+
+ const butn1 = $('id=canvasm.myo2:id/my_tariff_tile_details_btn')
+ butn1.click()
+
+Watch the App and you should see the "Details" button activity.
+
+Use browser.back() if necessary. Click the displayed buttons to see
+which one does the same. It should be the "Details" button top-right.
+
+So snapshot that in the debugger:
+
+  browser.getSignature('id=canvasm.myo2:id/my_tariff_tile_details_btn')
+
+You can also try the clicks in turn.
+
+ > const clks1 = $$('//*[*/@clickable = "true"]')
+ > clks1[0].click();
+ > browser.getSignature("clks[0] short-menu")
+ > browser.back()
+
+clks1[2] is Ausland
+
+### Tester to Developer
+
+The test data should be collected. The files make.log and the files in pages/ 
+should be zipped up and sent with a description of the Scenario processed.
+
+## Developer Tasks
+
+The pages are snapshot as text files of strings. The filename is its
+hashcode w<hashcode>.xml. So only unique pages are stored.
+
+Associated with each page file, is another file w<hashcode>.xml1 that
+contains the hashcode and the signature of the page. There is a third
+file w<hashcode>.xml2 that contains the screenshot at the time the
+page was captured.
+
+### Page Signatures
+
+The signature is some combination of these and other metrics, (see
+NewPage.ts for the latest).
+
+        this.radioButtons.length
+	this.radioButton.length
+        this.clickables.length
+        this.textNonEmpty.length
+        this.resourceId.length
+        this.editText.length
+        this.textView.length
+
+This is a tuple formed by counts of particular elements on the screen.
+	  
+	$$('/hierarchy//*[*/@resource-id = "canvasm.myo2:id/radio"]')
+        $$('/hierarchy//*/android.widget.RadioButton')
+        $$('//*[*/@clickable = "true"]')
+	$$('//*[*/@text != ""]')
+	$$('//*[*/@resource-id != ""]')
+	$$('/hierarchy//*/android.widget.EditText')
+	$$('/hierarchy//*/android.widget.TextView')
+
+There is function 'hlpr xml signatures' that will list the signatures from the
+XML files and as reported in the .xml1 files by appium-boilerplate.
+
+There is another method that will show the text fields within each file: 'hlpr xml texts'.
+
+It should be possible to match signatures with hashcodes with text fields to
+annotate which hashcode/signature is for which screen.
+
+Once you know what page you are on, you can add selector methods to obtain the elements.
+
+## Done
+
+Actions0 to browser.actions0(string)
+
+signatures, page dump and image dump : NewPage.getSignature() and browser.getSignature()
+
+Useful techniques. ConsentPage.waitForConsent() uses a wait for displayed in a try-except.
+It then collects the clickables and clicks the last but one.
+
+
 
 ## To Do
 
-In the debugger, I want to get access to Source0.dump() and other things.
+Scrolling.
 
-I particularly want to use it for keyboard input.
-
-It then uses the Actions0 class to fulfil the performActions() method. You can then construct
-sequences in JavaScript.
-
-In the debugger, you want to do this:
-
- 	let u0 = new Actions0(username)
-	let p0 = new Actions0(password)
-
-        await this.email.click();
-        // await this.keys2("ab") is the simple version of Actions0()
-        await driver.performActions(u0.value);
-        await this.password.click();
-        await driver.performActions(p0.value);
-
-The debugger does gives you access to the resolver
-
-  const l1 = $('id=canvasm.myo2:id/layout_login')
-  const mesg = await l1.getAttribute("text")
-  if (mesg == "green")
-
-In the function Consent.waitForConsent() this returns a promise, which
-has been used. It was used to check if a tag was present on the
-ConsentPage, and, if it was, then it would click the penultimate
-second-from-last clickable on the screen.
-
+Clicking - find where clickable is true. Descend and log the TextView[@text]. Map the text to indices.
 
 # appium-boilerplate
 

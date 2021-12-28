@@ -1,26 +1,45 @@
-import TabBar from '../screenobjects/components/TabBar';
 import LoginScreen from '../screenobjects/LoginScreen';
-import NativeAlert from '../screenobjects/components/NativeAlert';
+import AppScreen from "../screenobjects/AppScreen";
+import ConsentScreen from "../screenobjects/ConsentScreen";
+import HomeScreen from "../screenobjects/HomeScreen";
 
-describe('WebdriverIO and Appium, when interacting with a login form,', () => {
+// weaves
+// Only successful if run from fullReset.
+
+// Illustrates the addition of commands to browser in AppScreen.
+// Drops in the debugger at the end of the login.
+// You should attach an Inspector and record what you do.
+
+const slow0 = 8000;
+const slow1 = 3*slow0;
+
+describe('One session only - login and drop into debugger: ', () => {
     beforeEach(async () => {
-        await TabBar.waitForTabBarShown();
-        await TabBar.openLogin();
+        AppScreen.browser = browser; // set the browser for the page dumper and add commands
+
+        // a moment to stabilize
+        browser.pause(slow0)
+        await browser.getSignature("startup");
+
+        const t0 = await ConsentScreen.waitForIsShown(true, slow0); // Consent has an override
         await LoginScreen.waitForIsShown(true);
+        console.log('signature: ' + await browser.getSignature("login"));
     });
 
     it('should be able login successfully', async () => {
         // Always make sure you are on the right tab
-        await LoginScreen.tapOnLoginContainerButton();
+        await LoginScreen.radioButton('MOCK');
         // Submit the data
-        await LoginScreen.submitLoginForm1({username: 'test@webdriver.io', password: 'Test1234!'});
+        await LoginScreen.submitLoginForm1({username: 'o2udo00000002' + '\n', password: 'test' + '\n'});
 
-        await NativeAlert.waitForIsShown();
-        await expect(await NativeAlert.text()).toEqual('Success\nYou are logged in!');
+        // Logging in takes a long time
+        await LoginScreen.waitForIsShown(false, slow1);
 
-            // Close the alert
-        await NativeAlert.topOnButtonWithText('OK');
-        await NativeAlert.waitForIsShown(false);
+        // And the homescreen should appear
+        await HomeScreen.waitForIsShown(true, slow1);
+        console.log('signature: ' + await browser.getSignature("home"));
+
+        await browser.debug()
     });
 
 });

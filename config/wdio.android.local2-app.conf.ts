@@ -5,7 +5,7 @@ import config from './wdio.shared.local.appium.conf';
 // Specs
 // ============
 config.specs = [
-    './tests/specs3/app.*.spec.ts',
+    './tests/specs2/app.*.spec.ts',
 ];
 
 // ============
