@@ -53,8 +53,8 @@ export default class AppScreen {
         }
         browser.addCommand('getSignature', fdump)
 
-        const fmove = (name: string) => {
-            AppScreen.scrollMove()
+        const fmove = (dir0: boolean, band: number) => {
+            AppScreen.move0(dir0, band)
         }
         browser.addCommand('scroll0', fmove)
     }
@@ -69,45 +69,51 @@ export default class AppScreen {
     }
 
     /**
-     * Uses appium touchPerform()
+     * Uses appium W3C touchAction()
      */
-    static async scrollMove () {
-        const startPercentage = 10;
-        const endPercentage = 90;
-        const anchorPercentage = 50;
+    static async move0(upward: boolean = true, band: number = 40) {
+        const startPercentage = Math.trunc(50 - 0.5*band);
+        const endPercentage = Math.trunc(50 + 0.5*band);
+        const anchorPercentage = band;
 
         const {width, height} = await AppScreen.browser_.getWindowSize();
         const anchor = Math.trunc(width * anchorPercentage / 100);
         const startPoint = Math.trunc(height * startPercentage / 100);
         const endPoint = Math.trunc(height * endPercentage / 100);
+
         const actions1 = [
             {
                 action: 'press',
-                options: {
-                    x: anchor,
-                    y: startPoint,
-                },
+                x: anchor,
+                y: (upward ? endPoint : startPoint ),
             },
             {
                 action: 'wait',
-                options: {
-                    ms: 100,
-                },
+                ms: 100,
             },
             {
                 action: 'moveTo',
-                options: {
-                    x: anchor,
-                    y: endPoint,
-                },
+                x: anchor,
+                y: (upward ? startPoint : endPoint ),
+            },
+            'release',
+        ];
+        const actions2 = [
+            'press',
+            {
+                action: 'wait',
+                ms: 100,
             },
             {
-                action: 'release',
-                options: {},
+                action: 'moveTo',
+                x: anchor,
+                y: (upward ? startPoint : endPoint ),
             },
+            'release',
         ];
-        console.log(JSON.stringify(actions1))
-        driver.touchPerform(actions1);
+
+        console.log(JSON.stringify(actions2))
+        driver.touchAction(actions1);
     }
 
     /**
