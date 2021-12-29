@@ -71,7 +71,8 @@ export default class AppScreen {
     /**
      * Uses appium W3C touchAction()
      */
-    static async move0(upward: boolean = true, band: number = 40) {
+    static async move0(upward: boolean = true, band0: number = 40) {
+        const band = (0.5*band0 >= 50) ? 50 : band0 ;
         const startPercentage = Math.trunc(50 - 0.5*band);
         const endPercentage = Math.trunc(50 + 0.5*band);
         const anchorPercentage = band;
@@ -98,21 +99,8 @@ export default class AppScreen {
             },
             'release',
         ];
-        const actions2 = [
-            'press',
-            {
-                action: 'wait',
-                ms: 100,
-            },
-            {
-                action: 'moveTo',
-                x: anchor,
-                y: (upward ? startPoint : endPoint ),
-            },
-            'release',
-        ];
 
-        console.log(JSON.stringify(actions2))
+        console.log(JSON.stringify(actions1))
         driver.touchAction(actions1);
     }
 
