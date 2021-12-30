@@ -5,6 +5,8 @@ import Source0 = Local.Source0;
 import Actions0 = Local.Actions0;
 import NewPage = Screens.NewPage;
 
+const path = require('path')
+
 const WebDriver = require('webdriver').default
 
 /**
@@ -41,6 +43,9 @@ export default class AppScreen {
     static set browser(browser: WebdriverIO.Browser) {
         AppScreen.browser_ = browser
         AppScreen.source0_ = new Source0(browser)
+
+        const rpath = path.join(process.cwd(), 'tests', 'resources')
+        NewPage.initialize(rpath);
 
         const factions = (s: string) => {
             return AppScreen.perform0(s)

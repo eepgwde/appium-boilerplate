@@ -150,6 +150,7 @@ export module Local {
                     }
                 });
             }
+            return hexString
         }
 
     }

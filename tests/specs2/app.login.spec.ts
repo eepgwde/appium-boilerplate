@@ -2,6 +2,8 @@ import LoginScreen from '../screenobjects/LoginScreen';
 import AppScreen from "../screenobjects/AppScreen";
 import ConsentScreen from "../screenobjects/ConsentScreen";
 import HomeScreen from "../screenobjects/HomeScreen";
+import {Screens} from "../screenobjects/NewPage";
+import NewPage = Screens.NewPage;
 
 // weaves
 // Only successful if run from fullReset.
@@ -15,15 +17,19 @@ const slow1 = 3*slow0;
 
 describe('One session only - login and drop into debugger: ', () => {
     beforeEach(async () => {
-        AppScreen.browser = browser; // set the browser for the page dumper and add commands
+        // System initialization
+        // Set the browser for the page dumper and add commands, catalogue resources
+        AppScreen.browser = browser;
 
         // a moment to stabilize
         browser.pause(slow0)
         await browser.getSignature("startup");
 
+        const newpage = new NewPage()
+
         const t0 = await ConsentScreen.waitForIsShown(true, slow0); // Consent has an override
         await LoginScreen.waitForIsShown(true);
-        console.log('signature: ' + await browser.getSignature("login"));
+        console.log('hashcode: ' + await browser.getSignature("login"));
     });
 
     it('should be able login successfully', async () => {
@@ -37,7 +43,7 @@ describe('One session only - login and drop into debugger: ', () => {
 
         // And the homescreen should appear
         await HomeScreen.waitForIsShown(true, slow1);
-        console.log('signature: ' + await browser.getSignature("home"));
+        console.log('hashcode: ' + await browser.getSignature("home"));
 
         await browser.debug()
     });

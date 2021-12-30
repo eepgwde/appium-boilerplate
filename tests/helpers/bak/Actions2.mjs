@@ -1,58 +1,44 @@
 #!/usr/bin/env zx
 
-// jq -r 'to_entries|map("\(.key)=\(.value|tostring)")|.[]' test.json
-var PropertiesReader = require('properties-reader');
+// const fs = require('fs')
+const PropertiesReader = require('properties-reader');
+const path = require('path')
 
-var x0 = 'w00000001-text.properties'
-x0 = 'w264eed6d-text3.properties'
+console.log(process.cwd())
 
-var properties = PropertiesReader('../../resources/' + x0)
+console.log('hello')
 
-properties.each((key, value) => {
-  // called for each item in the reader,
-  // first with key=main.some.thing, value=foo
-  // next with key=blah.some.thing, value=bar
-  console.log(key + "; " + value)
-});
+const ddir = path.resolve('../../resources')
 
-$`exit 0`
+const files = await fs.readdirSync(ddir, (err) => { console.log(err) })
 
-// Early prototype
+const files1 = files.filter(fn => fn.endsWith('_desc.properties')).map( fn => path.join(ddir, fn) )
 
-class Actions0 {
-    constructor(mesg) {
-	const actions = new Array(mesg.length);
+// console.log(files1)
 
-	const chars = Array.from(mesg)
-	const k1 = chars.map( v => [ (this.keyPress(v, "keyDown")), (this.keyPress(v, "keyUp")) ]).flat()
-	const k2 = this.keyActions(k1)
-	this.actions = [ k2 ]
-    }
+console.log(files1[0])
 
-    keyPress(ch, dir) {
-	return {
-	    type : dir,
-	    value : ch
-	}
-    }
+let values = files1.map(fn => [ PropertiesReader(fn).get('hashCode'), fn ])
 
-    keyActions(ks) {
-	return {
-	    type : "key",
-	    actions : [ ks ],
-	    id : "default keyboard"
-	}
-    }
+let map0 = Object.fromEntries(values)
 
+console.log(map0)
+
+var properties = PropertiesReader(files1[0])
+
+console.log(properties.get("hashCode"))
+
+if (1==0) {
+    properties.each((key, value) => {
+	// called for each item in the reader,
+	// first with key=main.some.thing, value=foo
+	// next with key=blah.some.thing, value=bar
+	console.log(key + "; " + value)
+    });
 }
 
-const mesg = "user@name"
+// console.log(files)
 
-const k3 = new Actions0(mesg)
+throw '';
 
-
-
-fs.writeFileSync("./t.json", JSON.stringify(k3));
-
-// console.log(`actions: ${JSON.stringify(k2)}`)
 

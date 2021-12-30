@@ -1,3 +1,7 @@
+const fs = require('fs');
+const tmp = require('tmp');
+const path = require('path');
+const PropertiesReader = require('properties-reader')
 import AppScreen from './AppScreen';
 
 export module Screens {
@@ -9,12 +13,12 @@ export module Screens {
      */
     export class NewPage {
         private static page_: Screens.NewPage;
+        private static resources_: Map<string, string>;
 
         static async getSignature(name: string) : Promise<string> {
             const pg = await NewPage.getPage()
             const v0 = await pg.signature()
-            await AppScreen.source.dump(v0.toString(), name)
-            return v0.toString()
+            return await AppScreen.source.dump(v0.toString(), name)
         }
 
         static async getPage() : Promise<Screens.NewPage> {
@@ -80,6 +84,27 @@ export module Screens {
 
             let v1 = await Promise.all(promises)
             return v1
+        }
+
+        static resources() : Map<string, string> {
+            return NewPage.resources_
+        }
+
+        // Resources path
+        // If there are files _desc.properties in the directory load them into a Map against
+        // their hashCode.
+        static async initialize(rpath: string) {
+            if (!fs.existsSync(rpath)) return
+
+            const files = await fs.readdirSync(rpath, (err) => {
+                length: 0
+            });
+            if (typeof files == undefined) return
+            if (files.length == 0) return
+
+            const files1 = files.filter(fn => fn.endsWith('_desc.properties')).map( fn => path.join(rpath, fn) )
+            let values = files1.map(fn => [ PropertiesReader(fn).get('hashCode'), fn ])
+            NewPage.resources_ = Object.fromEntries(values)
         }
     }
 }
