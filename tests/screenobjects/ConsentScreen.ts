@@ -21,6 +21,8 @@ class ConsentScreen extends AppScreen {
                 reverse: !isShown
             });
             r1 = await r0
+            // take photo too.
+            await browser.getSignature("startup");
 
             const cbles = await $$('//*[*/@clickable = "true"]')
             const butn1 = cbles[cbles.length - 1]

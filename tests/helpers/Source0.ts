@@ -7,6 +7,8 @@
 //
 // https://github.com/webdriverio/webdriverio/blob/9d2220e89144b0ca69232737957ad5fc32ca1300/packages/webdriverio/tests/commands/browser/keys.test.ts
 
+import logger from "@wdio/logger";
+
 const fs = require('fs');
 const tmp = require('tmp');
 const path = require('path');
@@ -26,6 +28,8 @@ export module Local {
         }
         return hash;
     }
+
+    const log = logger('AppScreen')
 
     export class Actions0 {
 
@@ -75,7 +79,9 @@ export module Local {
                     prefix: string = "w",
                     postfix: string = ".xml",
                     useTempFile: boolean = false) {
-            fs.mkdirSync(ddir, {recursive: true})
+            if (!fs.existsSync(ddir, { recursive: true})) {
+                fs.mkdirSync(ddir, {recursive: true})
+            }
             this.browser_ = browser
             this.prefix = prefix
             this.postfix = postfix
@@ -115,26 +121,33 @@ export module Local {
             });
 
             // Take an image
-            const pic = await browser.takeScreenshot()
-            p0 = path.join(".", this.ddir, this.prefix + hexString + this.postfix + "2")
-            const promise1 = fs.writeFile(p0, pic, function (err) {
-                if (err) throw err;
-            });
+            try {
+                const pic = await browser.takeScreenshot()
+                p0 = path.join(".", this.ddir, this.prefix + hexString + this.postfix + "2")
+                const promise1 = fs.writeFile(p0, pic, function (err) {
+                    if (err) throw err;
+                });
+            } catch (e) {
+                log.warn("failed to take screenshot: " + p0)
+            }
 
             // Write out the page source to file
             if (this.useTempFile) {
                 const nm = tmp.fileSync({mode: 0o664, prefix: this.prefix, postfix: this.postfix, tmpdir: this.ddir});
                 console.log("nm.name: " + nm.name)
                 const promise = fs.writeFile(nm.name, page, function (err) {
-                    if (err) throw err;
-                    console.log('save-rnd');
+                    if (err) {
+                        log.warn('save-rnd: + ' + p0);
+                    }
                 });
             } else { /* use a hashCode */
                 let p0 = path.join(".", this.ddir, this.prefix + hexString + this.postfix)
 
                 const promise = fs.writeFile(p0, page, function (err) {
-                    if (err) throw err;
-                    console.log('save-hash');
+                    if (err) {
+                        log.warn('save-hash: + ' + p0);
+                        // throw err;
+                    }
                 });
             }
         }

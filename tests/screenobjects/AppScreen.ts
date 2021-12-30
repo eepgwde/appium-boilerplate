@@ -43,8 +43,7 @@ export default class AppScreen {
         AppScreen.source0_ = new Source0(browser)
 
         const factions = (s: string) => {
-            const a0 = new Actions0(s)
-            return a0.value
+            return AppScreen.perform0(s)
         }
         browser.addCommand('actions0', factions)
 
@@ -53,7 +52,7 @@ export default class AppScreen {
         }
         browser.addCommand('getSignature', fdump)
 
-        const fmove = (dir0: boolean, band: number) => {
+        const fmove = (dir0: boolean = true, band: number = 40) => {
             AppScreen.move0(dir0, band)
         }
         browser.addCommand('scroll0', fmove)
@@ -62,12 +61,17 @@ export default class AppScreen {
         return AppScreen.source0_;
     }
 
-    protected log = logger('LoginScreen')
+    protected log = logger('AppScreen')
 
     constructor (selector: string) {
         this.selector = selector;
     }
 
+    static async perform0(s: string) {
+        const actions0 = new Actions0(s)
+        await AppScreen.browser_.performActions(actions0.value)
+        return s
+    }
     /**
      * Uses appium W3C touchAction()
      */
@@ -101,7 +105,7 @@ export default class AppScreen {
         ];
 
         console.log(JSON.stringify(actions1))
-        driver.touchAction(actions1);
+        await driver.touchAction(actions1);
     }
 
     /**

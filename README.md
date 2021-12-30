@@ -227,13 +227,17 @@ signatures, page dump and image dump : NewPage.getSignature() and browser.getSig
 Useful techniques. ConsentPage.waitForConsent() uses a wait for displayed in a try-except.
 It then collects the clickables and clicks the last but one.
 
+Scrolling. browser.scroll0(upward: boolean = true, band: number =
+40). This moves the screen upward, so appears to scroll down. Band is
+40% of the screen about the middle.
 
+XSLT. Clicking - find where clickable is true. Descend and log the
+TextView[@text]. Map the text to indices. clicks.xslt.
 
 ## To Do
 
-Scrolling.
-
-Clicking - find where clickable is true. Descend and log the TextView[@text]. Map the text to indices.
+Back is not active for Menu, but centre screen away from menu does the
+same. This should be a perform actions called clickAway() outside of the frame.
 
 # appium-boilerplate
 

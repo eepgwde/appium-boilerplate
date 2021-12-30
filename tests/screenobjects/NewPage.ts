@@ -12,7 +12,7 @@ export module Screens {
 
         static async getSignature(name: string) : Promise<string> {
             const pg = await NewPage.getPage()
-            const v0 = pg.signature()
+            const v0 = await pg.signature()
             await AppScreen.source.dump(v0.toString(), name)
             return v0.toString()
         }

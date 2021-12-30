@@ -1,6 +1,23 @@
 #!/usr/bin/env zx
 
-// Early prototype of Actions0 now in Sources0
+// jq -r 'to_entries|map("\(.key)=\(.value|tostring)")|.[]' test.json
+var PropertiesReader = require('properties-reader');
+
+var x0 = 'w00000001-text.properties'
+x0 = 'w264eed6d-text3.properties'
+
+var properties = PropertiesReader('../../resources/' + x0)
+
+properties.each((key, value) => {
+  // called for each item in the reader,
+  // first with key=main.some.thing, value=foo
+  // next with key=blah.some.thing, value=bar
+  console.log(key + "; " + value)
+});
+
+$`exit 0`
+
+// Early prototype
 
 class Actions0 {
     constructor(mesg) {
