@@ -23,7 +23,7 @@ describe('One session only - login and drop into debugger: ', () => {
 
         const t0 = await ConsentScreen.waitForIsShown(true, slow0); // Consent has an override
         await LoginScreen.waitForIsShown(true);
-        console.log('signature: ' + await browser.getSignature("login"));
+        console.log('hashCode: ' + await browser.getSignature("login").hashCode);
     });
 
     it('should be able login successfully', async () => {

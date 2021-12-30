@@ -23,13 +23,14 @@ describe('One session only - login and drop into debugger: ', () => {
 
         // a moment to stabilize
         browser.pause(slow0)
-        await browser.getSignature("startup");
+        // browser.getSignature() does not work here.
+        const newPage = await NewPage.getSignature("startup");
 
-        const newpage = new NewPage()
+        console.log('hashcode: from resource: ' + newPage.hashCode)
 
         const t0 = await ConsentScreen.waitForIsShown(true, slow0); // Consent has an override
         await LoginScreen.waitForIsShown(true);
-        console.log('hashcode: ' + await browser.getSignature("login"));
+        console.log('hashcode: ' + await browser.getSignature("login").hashCode);
     });
 
     it('should be able login successfully', async () => {

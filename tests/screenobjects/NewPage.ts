@@ -6,6 +6,18 @@ import AppScreen from './AppScreen';
 
 export module Screens {
 
+    export class KnownPage {
+        private propsFile: string;
+        public readonly hashCode: string = "";
+        public resources: typeof PropertiesReader;
+
+        constructor(propsFile: string) {
+            this.propsFile = propsFile
+            this.resources = PropertiesReader(propsFile)
+            this.hashCode = this.resources.get("hashCode")
+        }
+    }
+
     /**
      * Scripted area
      *
@@ -13,17 +25,24 @@ export module Screens {
      */
     export class NewPage {
         private static page_: Screens.NewPage;
-        private static resources_: Map<string, string>;
+        private static resources_: Map<string, string> = new Map<string, string>();
 
-        static async getSignature(name: string) : Promise<string> {
-            const pg = await NewPage.getPage()
-            const v0 = await pg.signature()
-            return await AppScreen.source.dump(v0.toString(), name)
+        constructor() {
         }
 
-        static async getPage() : Promise<Screens.NewPage> {
-            this.page_ = new NewPage()
-            return this.page_
+        static async getSignature(name: string) : Promise<object> {
+            const v0 = await (new NewPage()).signature()
+
+            const hash0 = await AppScreen.source.dump(v0.toString(), name)
+            const fn = NewPage.resources_.get(hash0)
+            var kpage = {}
+            if (typeof fn == 'string') {
+                kpage = new KnownPage(fn)
+            }
+            return {
+                hashCode: hash0,
+                page: kpage,
+            }
         }
 
         public get radioButtons() {
@@ -82,7 +101,7 @@ export module Screens {
                 return v
             });
 
-            let v1 = await Promise.all(promises)
+            const v1 = await Promise.all(promises)
             return v1
         }
 
@@ -104,7 +123,8 @@ export module Screens {
 
             const files1 = files.filter(fn => fn.endsWith('_desc.properties')).map( fn => path.join(rpath, fn) )
             let values = files1.map(fn => [ PropertiesReader(fn).get('hashCode'), fn ])
-            NewPage.resources_ = Object.fromEntries(values)
+            // convert an array to a map
+            NewPage.resources_ = new Map(values)
         }
     }
 }

@@ -31,6 +31,10 @@ const WebDriver = require('webdriver').default
  * It has to be set early and is used by
  */
 export default class AppScreen {
+    constructor (selector: string) {
+        this.selector = selector;
+    }
+
     protected selector: string;
 
     private static source0_: Local.Source0;
@@ -53,7 +57,7 @@ export default class AppScreen {
         browser.addCommand('actions0', factions)
 
         const fdump = (name: string) => {
-            return NewPage.getSignature(name)
+            return NewPage.getSignature(name).hashCode
         }
         browser.addCommand('getSignature', fdump)
 
@@ -67,10 +71,6 @@ export default class AppScreen {
     }
 
     protected log = logger('AppScreen')
-
-    constructor (selector: string) {
-        this.selector = selector;
-    }
 
     static async perform0(s: string) {
         const actions0 = new Actions0(s)
