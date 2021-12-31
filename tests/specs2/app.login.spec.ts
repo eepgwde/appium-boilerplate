@@ -30,7 +30,7 @@ describe('One session only - login and drop into debugger: ', () => {
 
         const t0 = await ConsentScreen.waitForIsShown(true, slow0); // Consent has an override
         await LoginScreen.waitForIsShown(true);
-        console.log('hashcode: ' + await browser.getSignature("login").hashCode);
+        console.log('hashcode: ' + await NewPage.getSignature("login").hashCode);
     });
 
     it('should be able login successfully', async () => {
@@ -44,7 +44,11 @@ describe('One session only - login and drop into debugger: ', () => {
 
         // And the homescreen should appear
         await HomeScreen.waitForIsShown(true, slow1);
-        console.log('hashcode: ' + await browser.getSignature("home"));
+        const page = await NewPage.getSignature("home")
+        console.log('hashcode: ' + page.hashCode);
+
+        const kPage = NewPage.pageOf(page.hashCode)
+        const clks = await kPage.clickables
 
         await browser.debug()
     });

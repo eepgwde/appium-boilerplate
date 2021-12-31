@@ -2,6 +2,8 @@ import LoginScreen from '../screenobjects/LoginScreen';
 import AppScreen from "../screenobjects/AppScreen";
 import ConsentScreen from "../screenobjects/ConsentScreen";
 import HomeScreen from "../screenobjects/HomeScreen";
+import {Screens} from "../screenobjects/NewPage";
+import NewPage = Screens.NewPage;
 
 // weaves
 // Only successful if run from fullReset.
@@ -19,7 +21,7 @@ describe('One session only - login and drop into debugger: ', () => {
 
         // a moment to stabilize
         browser.pause(slow0)
-        await browser.getSignature("startup");
+        const newPage = await NewPage.getSignature("startup");
 
         const t0 = await ConsentScreen.waitForIsShown(true, slow0); // Consent has an override
         await LoginScreen.waitForIsShown(true);

@@ -93,6 +93,16 @@ export module Local {
             return this.ddir
         }
 
+        public async hashCode() : Promise<{ hashCode: string, src: string }> {
+            // Snapshot the page source.
+            const page = await browser.getPageSource()
+            const hexString = page.hashCode().toString(16)
+            return {
+                hashCode: hexString,
+                src: page
+            };
+        }
+
         /**
          * Writes out a page to a sub-directory, the session id is updated and another file with .xml1 is added.
          *
@@ -106,13 +116,15 @@ export module Local {
             });
 
             // Snapshot the page source.
-            const page = await browser.getPageSource()
-            const hexString = page.hashCode().toString(16)
+            // const page = await browser.getPageSource()
+            // const hexString = page.hashCode().toString(16)
+
+            const page = await this.hashCode()
 
             // Generate a hash and add a signature and write to disk.
-            let p0 = path.join(".", this.ddir, this.prefix + hexString + this.postfix + "1")
+            let p0 = path.join(".", this.ddir, this.prefix + page.hashCode + this.postfix + "1")
             const mark0 = {
-                hashCode: hexString,
+                hashCode: page.hashCode,
                 name: name,
                 signature: signature
             }
@@ -123,7 +135,7 @@ export module Local {
             // Take an image
             try {
                 const pic = await browser.takeScreenshot()
-                p0 = path.join(".", this.ddir, this.prefix + hexString + this.postfix + "2")
+                p0 = path.join(".", this.ddir, this.prefix + page.hashCode + this.postfix + "2")
                 const promise1 = fs.writeFile(p0, pic, function (err) {
                     if (err) throw err;
                 });
@@ -135,22 +147,22 @@ export module Local {
             if (this.useTempFile) {
                 const nm = tmp.fileSync({mode: 0o664, prefix: this.prefix, postfix: this.postfix, tmpdir: this.ddir});
                 console.log("nm.name: " + nm.name)
-                const promise = fs.writeFile(nm.name, page, function (err) {
+                const promise = fs.writeFile(nm.name, page.src, function (err) {
                     if (err) {
                         log.warn('save-rnd: + ' + p0);
                     }
                 });
             } else { /* use a hashCode */
-                let p0 = path.join(".", this.ddir, this.prefix + hexString + this.postfix)
+                let p0 = path.join(".", this.ddir, this.prefix + page.hashCode + this.postfix)
 
-                const promise = fs.writeFile(p0, page, function (err) {
+                const promise = fs.writeFile(p0, page.src, function (err) {
                     if (err) {
                         log.warn('save-hash: + ' + p0);
                         // throw err;
                     }
                 });
             }
-            return hexString
+            return page.hashCode
         }
 
     }

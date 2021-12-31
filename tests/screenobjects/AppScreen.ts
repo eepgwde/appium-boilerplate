@@ -65,6 +65,13 @@ export default class AppScreen {
             AppScreen.move0(dir0, band)
         }
         browser.addCommand('scroll0', fmove)
+
+        const fclickables = async () => {
+            const page = await AppScreen.source0_.hashCode()
+            const kPage = NewPage.pageOf(page.hashCode)
+            return Array.from(kPage.textsR.values())
+        }
+        browser.addCommand('clicks', fclickables)
     }
     static get source() : Local.Source0 {
         return AppScreen.source0_;
