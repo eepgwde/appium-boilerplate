@@ -16,18 +16,20 @@ export module Screens {
             this.resources = PropertiesReader(propsFile)
             this.hashCode = this.resources.get("hashCode")
         }
+
+        public get clickables() {
+            return $$('//*[*/@clickable = "true"]');
+        }
     }
 
     /**
-     * Scripted area
-     *
-     * The types of WebdriverIO are not visible here and classes must compile.
+     * Another singleton: used to get the signatures of a page.
      */
     export class NewPage {
         private static page_: Screens.NewPage;
         private static resources_: Map<string, string> = new Map<string, string>();
 
-        constructor() {
+        private constructor() {
         }
 
         static async getSignature(name: string) : Promise<object> {
