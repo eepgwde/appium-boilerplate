@@ -17,7 +17,7 @@ class ConsentScreen extends AppScreen {
 
     private get buttons() {
         const v0 = browser.isAndroid ? '//*[*/@clickable = "true"]' :
-            '*//XCUIElementTypeButton[@name="Alles Akzeptieren"]' ;
+            ConsentScreen.ios0 ;
         return v0;
     }
 
@@ -50,4 +50,4 @@ class ConsentScreen extends AppScreen {
 }
 
 export default new ConsentScreen(browser.isAndroid ? 'id=canvasm.myo2:id/ucHeader' :
-    ConsentScreen.ios0;
+    ConsentScreen.ios0);
