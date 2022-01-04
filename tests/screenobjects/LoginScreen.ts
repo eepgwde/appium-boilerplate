@@ -39,7 +39,7 @@ class LoginScreen extends AppScreen {
     private get email() {
         const v0 = browser.isAndroid ? 'id=canvasm.myo2:id/login_input_login_name' :
             AppScreen.iosPredicate('XCUIElementTypeTextField',
-                'name', 'Mail');
+                'value', 'Mail');
         return $(v0);
     }
 
