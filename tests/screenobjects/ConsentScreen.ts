@@ -50,4 +50,4 @@ class ConsentScreen extends AppScreen {
 }
 
 export default new ConsentScreen(browser.isAndroid ? 'id=canvasm.myo2:id/ucHeader' :
-    ConsentScreen.ios0;
+    ConsentScreen.ios0);
