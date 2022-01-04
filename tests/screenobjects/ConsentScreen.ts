@@ -1,11 +1,19 @@
 import AppScreen from './AppScreen';
+import {Screens} from "../screenobjects/NewPage";
+import NewPage = Screens.NewPage;
 
 /**
  * The consent screen has no info.
  *
- *
  */
 class ConsentScreen extends AppScreen {
+
+    private get buttons() {
+        const v0 = browser.isAndroid ? '//*[*/@clickable = "true"]' :
+            '*//XCUIElementTypeButton[@name="Alles Akzeptieren"]' ;
+        return v0;
+    }
+
     /**
      * ConsentScreen overrides this to be non-fatal timeout.
      *
@@ -22,10 +30,10 @@ class ConsentScreen extends AppScreen {
             });
             r1 = await r0
             // take photo too.
-            await browser.getSignature("startup");
+            await NewPage.getSignature("startup");
 
-            const cbles = await $$('//*[*/@clickable = "true"]')
-            const butn1 = cbles[cbles.length - 1]
+            const cbles = await $$(this.buttons)
+            const butn1 = cbles[ (cbles.length > 1) ? cbles.length - 1 : 0 ]
             await butn1.click()
         } catch (error) {
             console.warn(error)
@@ -34,4 +42,5 @@ class ConsentScreen extends AppScreen {
     }
 }
 
-export default new ConsentScreen('id=canvasm.myo2:id/ucHeader');
+export default new ConsentScreen(browser.isAndroid ? 'id=canvasm.myo2:id/ucHeader' :
+    '*//XCUIElementTypeSwitch[contains(@name,"Cookies")]');
