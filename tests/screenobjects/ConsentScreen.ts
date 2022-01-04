@@ -1,6 +1,7 @@
 import AppScreen from './AppScreen';
 import {Screens} from "../screenobjects/NewPage";
 import NewPage = Screens.NewPage;
+import logger from '@wdio/logger';
 
 /**
  * The consent screen has no info.
@@ -8,10 +9,12 @@ import NewPage = Screens.NewPage;
  */
 class ConsentScreen extends AppScreen {
 
+    protected log = logger('ConsentScreen');
+
     // iOS XCUITest needs another method, see WebDriverIO https://webdriver.io/docs/selectors/
     static ios0 : string = ""
     static {
-        const v0 = `type == 'XCUIElementTypeSwitch' && name CONTAINS 'Cookies'`
+        const v0 = `type == 'XCUIElementTypeButton' && name CONTAINS 'Alles'`
         ConsentScreen.ios0 = `-ios predicate string:${v0}`
         }
 
@@ -30,19 +33,21 @@ class ConsentScreen extends AppScreen {
     override async waitForIsShown(isShown = true, timeout: 8000): Promise<boolean | void> {
         let r0
         let r1
-        await browser.debug()
 
         try {
             r0 = $(this.selector).waitForDisplayed({
                 timeout: timeout,
                 reverse: !isShown
             });
+	    this.log.info("selector: " + this.selector)
             r1 = await r0
-            // take photo too.
-            await NewPage.getSignature("startup");
 
             const cbles = await $$(this.buttons)
+	    this.log.info("clickables: " + cbles.length);
             const butn1 = cbles[ (cbles.length > 1) ? cbles.length - 1 : 0 ]
+	    if (!browser.isAndroid) {
+	       this.log.info("consent button: " + butn1 );
+	    }
             await butn1.click()
         } catch (error) {
             console.warn(error)
