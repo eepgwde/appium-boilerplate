@@ -6,6 +6,16 @@ Appium testing on Cygwin for Android with W3C WebDriverIO
 
 ## Changes
 
+Latest command-lines for jenkins on jenkins are these:
+
+For Android
+  rlwrap -l make.log npx wdio run config/wdio.android.local2-app.conf.ts  --test app.login.spec.ts
+
+For iOS
+  rlwrap -l make.log npx wdio run config/wdio.ios.local2-app.conf.ts  --test app.login.spec.ts
+
+The .conf.ts files are the capabilities parameters
+
 ### Tester Tools
 
 The keys() method does not work on W3C servers, one must use
@@ -585,3 +595,4 @@ See [FAQ](./docs/FAQ.md)
 
 ## Tips and Tricks
 See [Tips and Tricks](./docs/TIPS_TRICKS.md)
+
