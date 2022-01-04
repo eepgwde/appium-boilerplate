@@ -21,26 +21,9 @@ describe('One session only - login and drop into debugger: ', () => {
 
         // a moment to stabilize
         browser.pause(slow0)
-        const newPage = await NewPage.getSignature("startup");
-
-        const t0 = await ConsentScreen.waitForIsShown(true, slow0); // Consent has an override
-        await LoginScreen.waitForIsShown(true);
-        console.log('hashCode: ' + await browser.getSignature("login").hashCode);
     });
 
-    it('should be able login successfully', async () => {
-        // Always make sure you are on the right tab
-        await LoginScreen.radioButton('MOCK');
-        // Submit the data
-        await LoginScreen.submitLoginForm1({username: 'o2udo00000002' + '\n', password: 'test' + '\n'});
-
-        // Logging in takes a long time
-        await LoginScreen.waitForIsShown(false, slow1);
-
-        // And the homescreen should appear
-        await HomeScreen.waitForIsShown(true, slow1);
-        console.log('signature: ' + await browser.getSignature("home"));
-
+    it('straight to debugger', async () => {
         await browser.debug()
     });
 

@@ -151,7 +151,7 @@ export default class AppScreen {
     }
 
     /**
-     * Wait for the defining element to appear or not.
+     * Fail if the defining element does not appear.
      *
      * @param {boolean} isShown
      */

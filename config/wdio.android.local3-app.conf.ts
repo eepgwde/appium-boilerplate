@@ -2,7 +2,7 @@ import { join } from 'path';
 import config from './wdio.shared.local.appium.conf';
 
 // ============
-// Specs
+// Specs - this system is straight into the debugger.
 // ============
 config.specs = [
     './tests/specs3/app.*.spec.ts',
@@ -34,7 +34,6 @@ config.capabilities = [
         // Read the reset strategies very well, they differ per platform, see
         // http://appium.io/docs/en/writing-running-appium/other/reset-strategies/
         'appium:noReset': true,
-        'appium:fullReset': false,
         'appium:newCommandTimeout': 0,
     },
 ];

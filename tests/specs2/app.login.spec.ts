@@ -44,7 +44,7 @@ describe('One session only - login and drop into debugger: ', () => {
         await LoginScreen.waitForIsShown(false, slow1);
 
         // And the homescreen should appear
-        await HomeScreen.waitForIsShown(true, slow1);
+        await HomeScreen.waitForIsShown(true, (2*slow1));
         const page = await NewPage.getSignature("home")
         console.log('hashcode: ' + page.hashCode);
 
