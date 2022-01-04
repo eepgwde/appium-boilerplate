@@ -9,7 +9,10 @@ class HomeScreen extends AppScreen {
     // "id=canvasm.myo2:id/um_value_max"
 
     constructor () {
-        super('id=canvasm.myo2:id/um_value_max');
+        const v0 = browser.isAndroid ? 'id=canvasm.myo2:id/um_value_max' :
+            AppScreen.iosPredicate('XCUIElementTypeNavigationBar', 'name',
+                'Startseite');
+        super(v0);
     }
 
     private get drawerImage1 () {
