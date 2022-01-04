@@ -30,6 +30,8 @@ class ConsentScreen extends AppScreen {
     override async waitForIsShown(isShown = true, timeout: 8000): Promise<boolean | void> {
         let r0
         let r1
+        await browser.debug()
+
         try {
             r0 = $(this.selector).waitForDisplayed({
                 timeout: timeout,

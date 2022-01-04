@@ -23,7 +23,6 @@ describe('One session only - login and drop into debugger: ', () => {
 
         // a moment to stabilize
         browser.pause(slow0)
-        await browser.debug()
         // browser.getSignature() does not work here.
         const newPage = await NewPage.getSignature("startup");
 
