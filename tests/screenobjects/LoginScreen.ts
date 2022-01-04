@@ -85,9 +85,12 @@ class LoginScreen extends AppScreen {
              */
             await $('~Login-screen').click();
         }
+
+	// Not needed here, we use return '\n'
+
         // On smaller screens there could be a possibility that the button is not shown
-        await Gestures.checkIfDisplayedWithSwipeUp(await this.loginButton, 2);
-        await this.loginButton.click();
+        // await Gestures.checkIfDisplayedWithSwipeUp(await this.loginButton, 2);
+        // await this.loginButton.click();
     }
 
     // Only this works! For W3C Appium not .keys()
@@ -140,8 +143,8 @@ class LoginScreen extends AppScreen {
 
         // Not needed - we use \n
         // On smaller screens there could be a possibility that the button is not shown
-        await Gestures.checkIfDisplayedWithSwipeUp(await this.loginButton, 2);
-        await this.loginButton.click();
+        // await Gestures.checkIfDisplayedWithSwipeUp(await this.loginButton, 2);
+        // await this.loginButton.click();
     }
 
     /**
