@@ -155,41 +155,51 @@ export module Screens {
 
         public get radioButtons() {
             // reliable
-            return $$('/hierarchy//*[*/@resource-id = "canvasm.myo2:id/radio"]');
+            const v0 = browser.isAndroid ? '/hierarchy//*[*/@resource-id = "canvasm.myo2:id/radio"]'
+                : '*//XCUIElementTypeButton';
+            return $$(v0);
         }
 
         public get radioButton() {
             // unreliable - one screen misses all of them?
-            return $$('/hierarchy//*/android.widget.RadioButton');
+            const v0 = browser.isAndroid ? '/hierarchy//*/android.widget.RadioButton' : '*//XCUIElementTypeButton';
+            return $$(v0);
         }
 
         public get clickables() {
             // unreliable - one screen misses all of them?
-            return $$('//*[*/@clickable = "true"]');
+            const v0 = browser.isAndroid ? '//*[*/@clickable = "true"]' : '*//XCUIElementTypeButton';
+            return $$(v0);
         }
 
         public get textNonEmpty() {
+            const v0 = browser.isAndroid ? '//*[*/@text != ""]' : '*//XCUIElementTypeStaticText';
             // reliable
-            return $$('//*[*/@text != ""]');
+            return $$(v0);
         }
 
         public get resourceId() {
+            const v0 = browser.isAndroid ? '//*[*/@resource-id != ""]' : '*//XCUIElementTypeOther';
             // reliable
-            return $$('//*[*/@resource-id != ""]');
+            return $$(v0);
         }
 
         public get editText() {
-            // reliable
-            return $$('/hierarchy//*/android.widget.EditText');
+            const v0 = browser.isAndroid ? '/hierarchy//*/android.widget.EditText' : '*//XCUIElementTypeTextField';
+            // and on iOS XCUIElementTypeSecureTextField
+            return $$(v0);
         }
 
         public get textView() {
+            const v0 = browser.isAndroid ? '/hierarchy//*/android.widget.TextView' : '*//XCUIElementTypeStaticText';
             // reliable
-            return $$('/hierarchy//*/android.widget.TextView');
+            return $$(v0);
         }
 
         public get drawerLayout() {
-            return $$('/hierarchy//*/androidx.drawerlayout.widget.DrawerLayout');
+            const v0 = browser.isAndroid ? '/hierarchy//*/androidx.drawerlayout.widget.DrawerLayout' :
+                '*//XCUIElementTypeSegmentedControl';
+            return $$(v0);
         }
 
         private static maker(hash0: string, fn: string) : KnownPage {

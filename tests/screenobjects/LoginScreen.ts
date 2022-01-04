@@ -14,25 +14,49 @@ import Actions0 = Local.Actions0;
  * The method used is submitLoginForm1()
  */
 class LoginScreen extends AppScreen {
-    constructor () {
-        super('id=canvasm.myo2:id/login_feature_manager_container');
+    constructor() { // [contains(@name,"Cookies")]'
+        const v0 = browser.isAndroid ?
+            'id=canvasm.myo2:id/login_feature_manager_container' :
+            '*//XCUIElementTypeOther[contains(@name, "loginNameInputField")] ';
+        super(v0)
     }
 
     private get radioButtons() {
-        return $$('id=canvasm.myo2:id/radio');
+        const v0 = browser.isAndroid ? 'id=canvasm.myo2:id/radio' : '*//XCUIElementTypeButton';
+        return $$(v0);
     }
 
-    private get loginContainer () {return $('id=canvasm.myo2:id/layout_login');}
-    private get loginButton () {return $('id=canvasm.myo2:id/button_login');}
+    private get loginButton() {
+        const v0 = browser.isAndroid ? 'id=canvasm.myo2:id/button_login' :
+            '*//XCUIElementTypeButton[contains(@name,"Einloggen")]';
+        return $(v0);
+    }
 
-    private get email () {return $('id=canvasm.myo2:id/login_input_login_name');}
-    private get password () {return $('id=canvasm.myo2:id/login_input_password');}
+    private get email() {
+        const v0 = browser.isAndroid ? 'id=canvasm.myo2:id/login_input_login_name' :
+            '*//XCUIElementTypeTextField[contains(@name,"Mail")]';
+        return $(v0);
+    }
+
+    private get password() {
+        const v0 = browser.isAndroid ? 'id=canvasm.myo2:id/login_input_password' :
+            '*//XCUIElementTypeSecureTextField';
+        return $(v0)
+    }
 
     // known as register
-    private get signUpButton () {return $('id=canvasm.myo2:id/button_register');}
-    private get repeatPassword () {return $('~input-repeat-password');}
+    private get signUpButton() {
+        const v0 = browser.isAndroid ? 'id=canvasm.myo2:id/button_register' :
+            '*//XCUIElementTypeButton[contains(@name,"regist")]';
+        return $(v0);
+    }
 
-    async submitLoginForm({ username, password }:{username:string; password:string;}) {
+    private get repeatPassword() {
+        const v0 = browser.isAndroid ? '~input - repeat - password' : '';
+        return $(v0);
+    }
+
+    async submitLoginForm({username, password}: { username: string; password: string; }) {
         await this.email.setValue(username);
         await this.password.setValue(password);
 
@@ -61,10 +85,10 @@ class LoginScreen extends AppScreen {
             {
                 type: 'key',
                 actions: [
-                    { type: 'keyDown', 'value': 'a' },
-                    { type: 'keyUp', 'value': 'a' },
-                    { type: 'keyDown', 'value': 'b' },
-                    { type: 'keyUp', 'value': 'b' },
+                    {type: 'keyDown', 'value': 'a'},
+                    {type: 'keyUp', 'value': 'a'},
+                    {type: 'keyDown', 'value': 'b'},
+                    {type: 'keyUp', 'value': 'b'},
                 ],
                 "id": "default keyboard"
             },
@@ -74,9 +98,9 @@ class LoginScreen extends AppScreen {
         await driver.pause(1000);
     }
 
-    async submitLoginForm1({ username, password }:{username:string; password:string;}) {
-	    let u0 = new Actions0(username)
-	    let p0 = new Actions0(password)
+    async submitLoginForm1({username, password}: { username: string; password: string; }) {
+        let u0 = new Actions0(username)
+        let p0 = new Actions0(password)
 
         await this.email.click();
         // await this.keys2("ab")
@@ -113,7 +137,7 @@ class LoginScreen extends AppScreen {
      * @param username
      * @param password
      */
-    async submitSignUpForm({ username, password }:{username:string; password:string;}) {
+    async submitSignUpForm({username, password}: { username: string; password: string; }) {
         await this.email.setValue(username);
         await this.password.setValue(password);
         await this.repeatPassword.setValue(password);
@@ -147,7 +171,7 @@ class LoginScreen extends AppScreen {
         let promises = b1.map(async v => {
             const tag = await v.getAttribute("text");
             return tag
-        } );
+        });
         const names = await Promise.all(promises)
         const fmatch = (element) => element == type0;
         const button0 = b1[(names.findIndex(fmatch))];
