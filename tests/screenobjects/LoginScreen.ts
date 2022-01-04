@@ -32,7 +32,7 @@ class LoginScreen extends AppScreen {
     private get loginButton() {
         const v0 = browser.isAndroid ? 'id=canvasm.myo2:id/button_login' :
         AppScreen.iosPredicate('XCUIElementTypeButton',
-            'name', 'Einloggen');
+            'label', 'Einloggen');
         return $(v0);
     }
 
@@ -138,6 +138,7 @@ class LoginScreen extends AppScreen {
             await $('~LoginScreen').click();
         }
 
+        // Not needed - we use \n
         // On smaller screens there could be a possibility that the button is not shown
         await Gestures.checkIfDisplayedWithSwipeUp(await this.loginButton, 2);
         await this.loginButton.click();

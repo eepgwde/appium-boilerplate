@@ -37,7 +37,9 @@ describe('One session only - login and drop into debugger: ', () => {
         // Always make sure you are on the right tab
         await LoginScreen.radioButton('MOCK');
         // Submit the data
-        await LoginScreen.submitLoginForm1({username: 'o2udo00000002' + '\n', password: 'test' + '\n'});
+        const password0 = 'test' ;
+        const v0 = browser.isAndroid ? (password0 + '\n') : password0 ; 
+        await LoginScreen.submitLoginForm1({username: 'o2udo00000002' + '\n', password: v0});
 
         // Logging in takes a long time
         await LoginScreen.waitForIsShown(false, slow1);
