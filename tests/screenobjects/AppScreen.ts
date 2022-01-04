@@ -127,11 +127,35 @@ export default class AppScreen {
     }
 
     /**
+     * Non-fatal timeout and drop to debugger.
+     *
+     * Wait until a button appears, then click the second from last clickable.
+     * $$('id=canvasm.myo2:id/radio');
+     */
+    async waitForIsShown(isShown = true, timeout: 8000): Promise<boolean | void> {
+        let r0
+        let r1
+
+        try {
+            r0 = $(this.selector).waitForDisplayed({
+                timeout: timeout,
+                reverse: !isShown
+            });
+            this.log.info("selector: " + this.selector)
+            r1 = await r0
+        } catch (error) {
+            this.log.warn(error)
+            await browser.debug
+        }
+        return r1
+    }
+
+    /**
      * Wait for the defining element to appear or not.
      *
      * @param {boolean} isShown
      */
-    async waitForIsShown (isShown = true, timeout = 8000): Promise<boolean | void> {
+    async waitForIsShown0 (isShown = true, timeout = 8000): Promise<boolean | void> {
         let v1 = $(this.selector).waitForDisplayed({
             timeout: timeout,
             interval: 300,
