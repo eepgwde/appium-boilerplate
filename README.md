@@ -3,6 +3,7 @@
 weaves
 
 Appium testing on Cygwin for Android with W3C WebDriverIO
+Also on iOS
 
 ## Changes
 
@@ -16,14 +17,26 @@ For iOS
 
 The .conf.ts files are the capabilities parameters
 
+### iOS
+
+iOS has a different type of selector because XPath is not fully supported, so this does not work
+
+  '*//XCUIElementTypeButton[contains(@name,"Cookie")]'
+
+and has to be replaced by this construction
+
+   const selector = `type == 'XCUIElementTypeSwitch' && name CONTAINS 'Cookie'`
+   const switch = `-ios predicate string:${selector}`
+   await $(switch).click()
+
 ### Tester Tools
 
 The keys() method does not work on W3C servers, one must use
 performActions(). I have added a class Actions0 to do the
-formating. This now has a full W3C Actions key, KeyUp, KeyDown
+formatting. This now has a full W3C Actions key, KeyUp, KeyDown
 implementation.
 
-It will also snapshot the XML pages to a directory ./pages/ on AppScreen.source().dump()
+It will also take a snapshot of XML pages to a directory ./pages/ on AppScreen.source().dump()
 It will also take an image capture of the screen.
 The debugger has been extended and can return a programmatic page object that can be interacted with.
 
@@ -121,7 +134,7 @@ just {} appeared.)
 
  $ let u0 = browser.actions0("username").value
 
-Returns an Actions0 object of the string "username" for use in a later call 
+Returns an Actions0 object of the string "username" for use in a later call
 
  $ browser.performActions(u0)
 
@@ -182,7 +195,7 @@ clks1[2] is Ausland
 
 ### Tester to Developer
 
-The test data should be collected. The files make.log and the files in pages/ 
+The test data should be collected. The files make.log and the files in pages/
 should be zipped up and sent with a description of the Scenario processed.
 
 ## Developer Tasks
@@ -209,7 +222,7 @@ NewPage.ts for the latest).
         this.textView.length
 
 This is a tuple formed by counts of particular elements on the screen.
-	  
+
 	$$('/hierarchy//*[*/@resource-id = "canvasm.myo2:id/radio"]')
         $$('/hierarchy//*/android.widget.RadioButton')
         $$('//*[*/@clickable = "true"]')
@@ -245,6 +258,8 @@ XSLT. Clicking - find where clickable is true. Descend and log the
 TextView[@text]. Map the text to indices. clicks.xslt.
 
 ## To Do
+
+iOS selectors
 
 Back is not active for Menu, but centre screen away from menu does the
 same. This should be a perform actions called clickAway() outside of the frame.

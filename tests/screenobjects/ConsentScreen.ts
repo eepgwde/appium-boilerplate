@@ -8,6 +8,13 @@ import NewPage = Screens.NewPage;
  */
 class ConsentScreen extends AppScreen {
 
+    // iOS XCUITest needs another method, see WebDriverIO https://webdriver.io/docs/selectors/
+    static ios0 : string = ""
+    static {
+        const v0 = `type == 'XCUIElementTypeSwitch' && name CONTAINS 'Cookies'`
+        ConsentScreen.ios0 = `-ios predicate string:${v0}`
+        }
+
     private get buttons() {
         const v0 = browser.isAndroid ? '//*[*/@clickable = "true"]' :
             '*//XCUIElementTypeButton[@name="Alles Akzeptieren"]' ;
@@ -43,4 +50,4 @@ class ConsentScreen extends AppScreen {
 }
 
 export default new ConsentScreen(browser.isAndroid ? 'id=canvasm.myo2:id/ucHeader' :
-    '*//XCUIElementTypeSwitch[contains(@name,"Cookies")]');
+    ConsentScreen.ios0;

@@ -110,9 +110,10 @@ export module Local {
          */
         async dump(signature: string, name: string = "unnamed") {
             // Update the session-id
-            fs.writeFile("session.json-id", browser.sessionId.toString(), function (err) {
+            const sid = browser.sessionId.toString().replace('_', '');
+            fs.writeFile("session.json-id", sid, function (err) {
                 if (err) throw err;
-                console.log('session-id');
+                log.info('session-id');
             });
 
             // Snapshot the page source.
@@ -146,7 +147,7 @@ export module Local {
             // Write out the page source to file
             if (this.useTempFile) {
                 const nm = tmp.fileSync({mode: 0o664, prefix: this.prefix, postfix: this.postfix, tmpdir: this.ddir});
-                console.log("nm.name: " + nm.name)
+                log.info("nm.name: " + nm.name)
                 const promise = fs.writeFile(nm.name, page.src, function (err) {
                     if (err) {
                         log.warn('save-rnd: + ' + p0);
