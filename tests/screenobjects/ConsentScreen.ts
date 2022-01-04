@@ -11,7 +11,7 @@ class ConsentScreen extends AppScreen {
     // iOS XCUITest needs another method, see WebDriverIO https://webdriver.io/docs/selectors/
     static ios0 : string = ""
     static {
-        const v0 = `type == 'XCUIElementTypeSwitch' && name CONTAINS 'Cookies'`
+        const v0 = `type == 'XCUIElementTypeSwitch' && name CONTAINS 'Alles'`
         ConsentScreen.ios0 = `-ios predicate string:${v0}`
         }
 
