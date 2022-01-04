@@ -11,6 +11,7 @@ class ConsentScreen extends AppScreen {
 
     protected log = logger('ConsentScreen');
 
+    // This is now a static method in the base class.
     // iOS XCUITest needs another method, see WebDriverIO https://webdriver.io/docs/selectors/
     static ios0 : string = ""
     static {
@@ -18,9 +19,13 @@ class ConsentScreen extends AppScreen {
         ConsentScreen.ios0 = `-ios predicate string:${v0}`
         }
 
+    /**
+     * Android: list of buttons; iOS: the named button.
+     * @private
+     */
     private get buttons() {
         const v0 = browser.isAndroid ? '//*[*/@clickable = "true"]' :
-            ConsentScreen.ios0 ;
+            this.selector ;
         return v0;
     }
 
@@ -57,4 +62,4 @@ class ConsentScreen extends AppScreen {
 }
 
 export default new ConsentScreen(browser.isAndroid ? 'id=canvasm.myo2:id/ucHeader' :
-    ConsentScreen.ios0);
+    AppScreen.iosPredicate('XCUIElementTypeButton', 'name', 'Alles'));

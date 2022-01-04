@@ -40,6 +40,11 @@ export default class AppScreen {
     private static source0_: Local.Source0;
     protected static browser_: WebdriverIO.Browser
 
+    static iosPredicate(type0: string, attr0: string, name0: string): string {
+        const v0 = `type == '${type0}' && ${attr0} CONTAINS '${name0}'`
+        return `-ios predicate string:${v0}`
+    }
+
     /**
      * Take this opportunity to add a custom command.
      * @param browser
@@ -48,7 +53,8 @@ export default class AppScreen {
         AppScreen.browser_ = browser
         AppScreen.source0_ = new Source0(browser)
 
-        const rpath = path.join(process.cwd(), 'tests', 'resources')
+        const rpath = path.join(process.cwd(), 'tests', 'resources',
+            browser.isAndroid ? 'android' : 'ios')
         NewPage.initialize(rpath);
 
         const factions = (s: string) => {

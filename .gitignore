@@ -26,3 +26,5 @@ session.json-id
 
 docs/my-*
 
+tests/resources/ios/*.*
+tests/resources/android/*.*

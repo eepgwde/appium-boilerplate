@@ -17,24 +17,29 @@ class LoginScreen extends AppScreen {
     constructor() { // [contains(@name,"Cookies")]'
         const v0 = browser.isAndroid ?
             'id=canvasm.myo2:id/login_feature_manager_container' :
-            '*//XCUIElementTypeOther[contains(@name, "loginNameInputField")] ';
+            AppScreen.iosPredicate('XCUIElementTypeOther',
+                'name', 'loginNameInputField');
         super(v0)
     }
 
+    // Android only
     private get radioButtons() {
-        const v0 = browser.isAndroid ? 'id=canvasm.myo2:id/radio' : '*//XCUIElementTypeButton';
+        const v0 = browser.isAndroid ? 'id=canvasm.myo2:id/radio' :
+            AppScreen.iosPredicate('XCUIElementTypeButton', 'name', 'Mock')
         return $$(v0);
     }
 
     private get loginButton() {
         const v0 = browser.isAndroid ? 'id=canvasm.myo2:id/button_login' :
-            '*//XCUIElementTypeButton[contains(@name,"Einloggen")]';
+        AppScreen.iosPredicate('XCUIElementTypeButton',
+            'name', 'Einloggen');
         return $(v0);
     }
 
     private get email() {
         const v0 = browser.isAndroid ? 'id=canvasm.myo2:id/login_input_login_name' :
-            '*//XCUIElementTypeTextField[contains(@name,"Mail")]';
+            AppScreen.iosPredicate('XCUIElementTypeTextField',
+                'name', 'Mail');
         return $(v0);
     }
 
@@ -47,7 +52,8 @@ class LoginScreen extends AppScreen {
     // known as register
     private get signUpButton() {
         const v0 = browser.isAndroid ? 'id=canvasm.myo2:id/button_register' :
-            '*//XCUIElementTypeButton[contains(@name,"regist")]';
+            AppScreen.iosPredicate('XCUIElementTypeButton',
+                'name', 'regist');
         return $(v0);
     }
 
@@ -56,6 +62,11 @@ class LoginScreen extends AppScreen {
         return $(v0);
     }
 
+    /**
+     * Not used, setValue() does not work for Android.
+     * @param username
+     * @param password
+     */
     async submitLoginForm({username, password}: { username: string; password: string; }) {
         await this.email.setValue(username);
         await this.password.setValue(password);
@@ -103,7 +114,7 @@ class LoginScreen extends AppScreen {
         let p0 = new Actions0(password)
 
         await this.email.click();
-        // await this.keys2("ab")
+        // you can check with await this.keys2("ab")
         await driver.performActions(u0.value);
 
         // Add a pause, just to make sure the drag and drop is done
@@ -124,7 +135,7 @@ class LoginScreen extends AppScreen {
              *
              * That's why we click outside of the keyboard.
              */
-            await $('~Login-screen').click();
+            await $('~LoginScreen').click();
         }
 
         // On smaller screens there could be a possibility that the button is not shown
@@ -168,6 +179,10 @@ class LoginScreen extends AppScreen {
     async radioButton(type0: string) {
         let b1 = await this.radioButtons
         this.log.info("buttons: count: " + b1.length)
+        if (b1.length == 1) { // iOS returns one button.
+            await b1[0].click()
+            return;
+        }
         let promises = b1.map(async v => {
             const tag = await v.getAttribute("text");
             return tag

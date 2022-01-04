@@ -50,7 +50,9 @@ export module Screens {
          * sections().
          */
         public get clickables() {
-            return $$('//*[*/@clickable = "true"]');
+            const v0 = browser.isAndroid ? '//*[*/@clickable = "true"]' :
+                '*//XCUIElementTypeButton' ;
+            return $$(v0);
         }
 
         /**
@@ -143,6 +145,8 @@ export module Screens {
 
     /**
      * Another singleton: used to get the signatures of a page.
+     *
+     * It can also create a KnownPage from a hash-code.
      */
     export class NewPage {
         private static page_: Screens.NewPage;
