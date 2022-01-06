@@ -1,7 +1,11 @@
 const fs = require('fs');
 const tmp = require('tmp');
 const path = require('path');
+
+// I can't find this
+// @ts-ignore
 import PropertiesReader = require('properties-reader')
+
 import AppScreen from './AppScreen';
 import logger from "@wdio/logger";
 
@@ -234,14 +238,14 @@ export module Screens {
         static async initialize(rpath: string) {
             if (!fs.existsSync(rpath)) return
 
-            const files = fs.readdirSync(rpath, (err) => {
+            const files = fs.readdirSync(rpath, (err: any) => {
                 log.warn(err)
             });
             if (typeof files == undefined) return
             if (files.length == 0) return
 
-            const files1 = files.filter(fn => fn.endsWith('_desc.properties')).map(fn => path.join(rpath, fn))
-            let values = files1.map(fn => [PropertiesReader(fn).get('hashCode'), fn])
+            const files1 = files.filter((fn: string) => fn.endsWith('_desc.properties')).map((fn:string) => path.join(rpath, fn))
+            let values = files1.map((fn: string) => [PropertiesReader(fn).get('hashCode'), fn])
             // convert an array to a map
             NewPage.resources_ = new Map(values)
         }

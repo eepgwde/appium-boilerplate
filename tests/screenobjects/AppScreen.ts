@@ -1,5 +1,7 @@
 import logger from '@wdio/logger'
 import {Local} from "../helpers/Source0";
+import log0 = Local.log;
+
 import {Screens} from "../screenobjects/NewPage";
 import Source0 = Local.Source0;
 import Actions0 = Local.Actions0;
@@ -31,28 +33,119 @@ const WebDriver = require('webdriver').default
  * It has to be set early and is used by
  */
 export default class AppScreen {
+    static get reset0() : boolean {
+        // Record the state of reset
+        let reset1 = ('fullReset' in browser.capabilities) ? browser.capabilities.fullReset : undefined
+        if (reset1 === undefined)
+            reset1 = ('noReset' in browser.capabilities) ? !browser.capabilities.noReset : undefined
+
+        if (typeof reset1 != 'boolean') throw 'No reset state defined';
+
+        // @ts-ignore
+        return reset1
+    }
+
     constructor (selector: string) {
         this.selector = selector;
     }
 
-    protected selector: string;
+    public selector: string = "";
 
     private static source0_: Local.Source0;
     protected static browser_: WebdriverIO.Browser
 
-    static iosPredicate(type0: string, attr0: string, name0: string): string {
-        const v0 = `type == '${type0}' && ${attr0} CONTAINS '${name0}'`
+    /**
+     * A common logger for all the pages.
+     *
+     * JavaScript does not support super.log to the field member so a property is used.
+     */
+    private log_ = logger('AppScreen')
+    get log() {
+        return this.log_
+    }
+
+    /**
+     * Simplifies text search.
+     *
+     * Actually implements {@code //*\/type0[contains(@attr0, 'value0')]}
+     * Compatible with iosPredicate() below.
+     *
+     * The XPath is not case-insensitive and only version 2.0 of XPath supports a lower-case
+     * method.
+     *
+     * @param type0 is an element name, an android.widget.TextView or similar classname, also '*'
+     * @param attr0 text name of an attribute.
+     * @param value0 case-sensitive text
+     */
+    static andPredicate(type0: string, attr0: string, value0: string): string {
+        const v0 = `//*/${type0}[contains(@${attr0},"${value0}")]`
+        return v0
+    }
+
+    /**
+     * Simplifies text search.
+     *
+     * XPath selection does not work well
+     * iOS XCUITest needs another method, see WebDriverIO https://webdriver.io/docs/selectors/
+     *
+     * The selector is not case-insensitive.
+     *
+     * @param type0 is an element name, an android.widget.TextView or similar classname, also '*'
+     * @param attr0 text name of an attribute.
+     * @param value0 case-sensitive text
+     */
+    static iosPredicate(type0: string, attr0: string, value0: string): string {
+        const v0 = `type == '${type0}' && ${attr0} CONTAINS '${value0}'`
         return `-ios predicate string:${v0}`
     }
 
     /**
-     * Take this opportunity to add a custom command.
+     * Selector string to get the available buttons (or clickables)
+     *
+     * With Android, there is no guarantee there will be a text attribute as an attriute to a clickable, it
+     * may well be a child node or an Image.
+     *
+     * Because of that this string will not be good for searching across the buttons for an attribute value.
+     * See LoginScreen::radioButton() where fortunately there is another XPath.
+     *
+     * @private
+     */
+    protected get buttons() {
+        const v0 = browser.isAndroid ? '//*[*/@clickable = "true"]' :
+            'XCUIElementTypeButton';
+        return v0;
+    }
+
+    /**
+     * Check for the existence of a selector without errors.
+     *
+     * This searches for the list and returns whether the length is greater than 0.
+     *
+     * @param selector0
+     * @protected
+     */
+    protected async safely(selector0 : string = "") : Promise<boolean> {
+        let count = 0
+        try {
+            const v0 = await $$(selector0)
+            count = v0.length
+        } catch (err) {
+            this.log.debug("safely: " + err)
+        }
+
+        return count > 0
+    }
+
+    /**
+     * The setter is used to configure the browser and adding custom commands.
+     *
      * @param browser
      */
     static set browser(browser: WebdriverIO.Browser) {
         AppScreen.browser_ = browser
         AppScreen.source0_ = new Source0(browser)
 
+        // This feature is not used at the moment.
         const rpath = path.join(process.cwd(), 'tests', 'resources',
             browser.isAndroid ? 'android' : 'ios')
         NewPage.initialize(rpath);
@@ -63,7 +156,7 @@ export default class AppScreen {
         browser.addCommand('actions0', factions)
 
         const fdump = (name: string) => {
-            return NewPage.getSignature(name).hashCode
+            return (NewPage.getSignature(name)).hashCode
         }
         browser.addCommand('getSignature', fdump)
 
@@ -72,6 +165,7 @@ export default class AppScreen {
         }
         browser.addCommand('scroll0', fmove)
 
+        // This relies upon the .properties files and may not work.
         const fclickables = async () => {
             const page = await AppScreen.source0_.hashCode()
             const kPage = NewPage.pageOf(page.hashCode)
@@ -82,8 +176,6 @@ export default class AppScreen {
     static get source() : Local.Source0 {
         return AppScreen.source0_;
     }
-
-    protected log = logger('AppScreen')
 
     static async perform0(s: string) {
         const actions0 = new Actions0(s)
@@ -122,30 +214,34 @@ export default class AppScreen {
             'release',
         ];
 
-        console.log(JSON.stringify(actions1))
+        log0.debug(JSON.stringify(actions1))
+        // @ts-ignore
         await driver.touchAction(actions1);
     }
 
     /**
      * Non-fatal timeout and drop to debugger.
      *
-     * Wait until a button appears, then click the second from last clickable.
-     * $$('id=canvasm.myo2:id/radio');
+     * Wait until a button appears and return false if not present.
      */
-    async waitForIsShown(isShown = true, timeout: 8000): Promise<boolean | void> {
+    async waitForIsShown(isShown = true, timeout: number = 8000,
+                         selector0: string = this.selector): Promise<boolean | void> {
+        if (selector0.length == 0) return false
+
         let r0
         let r1
 
         try {
-            r0 = $(this.selector).waitForDisplayed({
+            r0 = $(selector0).waitForDisplayed({
                 timeout: timeout,
                 reverse: !isShown
             });
             this.log.info("selector: " + this.selector)
-            r1 = await r0
+            await r0
+            r1 = true
         } catch (error) {
             this.log.warn(error)
-            await browser.debug
+            r1 = false
         }
         return r1
     }
@@ -155,13 +251,15 @@ export default class AppScreen {
      *
      * @param {boolean} isShown
      */
-    async waitForIsShown0 (isShown = true, timeout = 8000): Promise<boolean | void> {
-        let v1 = $(this.selector).waitForDisplayed({
+    async waitForIsShownFatal (isShown = true, timeout = 8000,
+                           selector0: string = this.selector): Promise<boolean | void> {
+        if (selector0.length == 0) throw 'invalid selector'
+
+        let v1 = $(selector0).waitForDisplayed({
             timeout: timeout,
             interval: 300,
             reverse: !isShown,
         });
-        this.log.info("waitForIsShown: " + v1)
         return v1;
     }
 

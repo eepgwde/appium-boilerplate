@@ -10,16 +10,28 @@ Also on iOS
 Latest command-lines for jenkins on jenkins are these:
 
 For Android
-  rlwrap -l make.log npx wdio run config/wdio.android.local2-app.conf.ts  --test app.login.spec.ts
+  rlwrap npx wdio run config/wdio.android.local2-app.conf.ts  --test app.login.spec.ts
 
 For iOS
-  rlwrap -l make.log npx wdio run config/wdio.ios.local2-app.conf.ts  --test app.login.spec.ts
+  rlwrap npx wdio run config/wdio.ios.local2-app.conf.ts  --test app.login.spec.ts
 
 The .conf.ts files are the capabilities parameters
 
+The port number, the logLevels and the outputDir are defined in wdio.shared.conf.ts
+
+They have been set for the Jenkins system as 4724, info and logs/.
+
+### Startup state
+
+The noReset and fullReset properties in capabilities determine the start-up sequence.
+This can now be interrogated using AppScreen.reset0, a static property. This should be the right logic:
+if not(fullReset) then not(noReset) else fullReset
+
 ### iOS
 
-iOS has a different type of selector because XPath is not fully supported, so this does not work
+[Editor: this needs checking]
+
+iOS has a different type of selector because XPath is not fully supported, so this does not work for iOS
 
   '*//XCUIElementTypeButton[contains(@name,"Cookie")]'
 
@@ -28,6 +40,14 @@ and has to be replaced by this construction
    const selector = `type == 'XCUIElementTypeSwitch' && name CONTAINS 'Cookie'`
    const switch = `-ios predicate string:${selector}`
    await $(switch).click()
+
+### Android Clickables
+
+iOS button selector is a single statement on a class. And the button class will have a name or label string. For
+Android, other elements may be clickable and not have text. The descriptive text may be below the clickable element.
+
+For the LoginScreen, this can be avoided by using a resource-id XPath selector. Elsewhere, another type of XPath has
+to be used - this is still on the TODO list.
 
 ### Tester Tools
 
@@ -214,7 +234,7 @@ The signature is some combination of these and other metrics, (see
 NewPage.ts for the latest).
 
         this.radioButtons.length
-	this.radioButton.length
+	    this.radioButton.length
         this.clickables.length
         this.textNonEmpty.length
         this.resourceId.length
@@ -257,9 +277,11 @@ Scrolling. browser.scroll0(upward: boolean = true, band: number =
 XSLT. Clicking - find where clickable is true. Descend and log the
 TextView[@text]. Map the text to indices. clicks.xslt.
 
+iOS selectors
+
 ## To Do
 
-iOS selectors
+Android clickables, trying to find associated text or content-desc or other descriptive field.
 
 Back is not active for Menu, but centre screen away from menu does the
 same. This should be a perform actions called clickAway() outside of the frame.

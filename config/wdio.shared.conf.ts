@@ -12,7 +12,7 @@ export const config: WebdriverIO.Config = {
     // on a remote machine).
     runner: 'local',
     hostname: 'localhost',
-    port: 4723,
+    port: 4724,
     path: '/wd/hub/',
     //
     // ==================
@@ -60,9 +60,10 @@ export const config: WebdriverIO.Config = {
     // - @wdio/cli, @wdio/config, @wdio/utils
     // Level of logging verbosity: trace | debug | info | warn | error | silent
     logLevel: 'debug',
-    logLevels: { webdriver: 'trace' },
+    logLevels: { webdriver: 'debug' },
     //    webdriverio: 'debug',
     // },
+    outputDir: 'logs',
     //
     // If you only want to run your tests until a specific amount of tests have failed use
     // bail (default is 0 - don't bail, run all tests).
@@ -80,9 +81,9 @@ export const config: WebdriverIO.Config = {
     waitforTimeout: 45000,
     // Default timeout in milliseconds for request
     // if browser driver or grid doesn't send response
-    connectionRetryTimeout: 120000,
+    connectionRetryTimeout: 16000,
     // Default request retries count
-    connectionRetryCount: 1,
+    connectionRetryCount: 2,
     // Test runner services
     // Services take over a specific job you don't want to take care of. They enhance
     // your test setup with almost no effort. Unlike plugins, they don't add new
@@ -138,7 +139,10 @@ export const config: WebdriverIO.Config = {
      * NOTE: No Hooks are used in this project, but feel free to add them if you need them.
      */
     onWorkerStart: function (cid, caps, specs, args, execArgv) {
-        console.log('starting up')
+        console.log('worker-start')
+    },
+    onComplete: function (exitCode, config,caps, result) {
+        console.log('on-complete')
     }
 };
 

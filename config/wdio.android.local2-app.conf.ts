@@ -2,7 +2,7 @@ import { join } from 'path';
 import config from './wdio.shared.local.appium.conf';
 
 // ============
-// Specs - This system is login from reset.
+// Specs
 // ============
 config.specs = [
     './tests/specs2/app.*.spec.ts',
@@ -39,7 +39,7 @@ config.capabilities = [
         // Read the reset strategies very well, they differ per platform, see
         // http://appium.io/docs/en/writing-running-appium/other/reset-strategies/
         'appium:noReset': false,
-        'appium:fullReset': true,
+        'appium:fullReset': false,
         'appium:newCommandTimeout': 0,
     },
 ];

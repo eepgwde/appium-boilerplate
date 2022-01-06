@@ -1,9 +1,13 @@
+import {Local} from "../helpers/Source0";
+import log = Local.log;
+
 /**
  * Get the time difference in seconds
  */
 export function timeDifference (string: string, start:number, end:number) {
     const elapsed = (end - start) / 1000;
-    console.log(`${string} It took ${elapsed} seconds.`);
+    // console.log(`${string} It took ${elapsed} seconds.`);
+    log.info(`${string} It took ${elapsed} seconds.`)
 }
 
 /**

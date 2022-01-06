@@ -1,65 +1,47 @@
 import AppScreen from './AppScreen';
-import {Screens} from "../screenobjects/NewPage";
-import NewPage = Screens.NewPage;
-import logger from '@wdio/logger';
 
 /**
- * The consent screen has no info.
+ * The Consent screen may appear depending on Reset and Cookie options
+ *
+ * There is a safe test for a button. Safe means you know this is the Consent Screen.
+ *
+ * Some unsafe action is available, see the throw statement.
  *
  */
 class ConsentScreen extends AppScreen {
-
-    protected log = logger('ConsentScreen');
-
-    // This is now a static method in the base class.
-    // iOS XCUITest needs another method, see WebDriverIO https://webdriver.io/docs/selectors/
-    static ios0 : string = ""
-    static {
-        const v0 = `type == 'XCUIElementTypeButton' && name CONTAINS 'Alles'`
-        ConsentScreen.ios0 = `-ios predicate string:${v0}`
-        }
-
-    /**
-     * Android: list of buttons; iOS: the named button.
-     * @private
-     */
-    private get buttons() {
-        const v0 = browser.isAndroid ? '//*[*/@clickable = "true"]' :
-            this.selector ;
-        return v0;
+    constructor() {
+        super(browser.isAndroid ?
+            AppScreen.andPredicate('*', 'text', 'Alles') :
+            AppScreen.iosPredicate('XCUIElementTypeButton', 'name', 'Alles'))
     }
 
     /**
-     * ConsentScreen overrides this to be non-fatal timeout.
-     *
-     * Wait until a button appears, then click the second from last clickable.
-     * $$('id=canvasm.myo2:id/radio');
+     * Click the second from last button.
      */
-    override async waitForIsShown(isShown = true, timeout: 8000): Promise<boolean | void> {
-        let r0
-        let r1
-
+    async assent1() {
         try {
-            r0 = $(this.selector).waitForDisplayed({
-                timeout: timeout,
-                reverse: !isShown
-            });
-	    this.log.info("selector: " + this.selector)
-            r1 = await r0
+            const v0 = await super.safely(super.buttons)
+            if (!v0) return
 
-            const cbles = await $$(this.buttons)
-	    this.log.info("clickables: " + cbles.length);
-            const butn1 = cbles[ (cbles.length > 1) ? cbles.length - 1 : 0 ]
-	    if (!browser.isAndroid) {
-	       this.log.info("consent button: " + butn1 );
-	    }
-            await butn1.click()
+            const buttons = await $$(super.buttons)
+            const len0 = buttons.length
+            // @ts-ignore
+            await buttons[len0 >= 2 ? (len0 - 1) : 0].click()
         } catch (error) {
-            console.warn(error)
+            this.log.warn(error)
         }
-        return r1
+    }
+
+    /**
+     * Simply click the accept button.
+     */
+    async assent() {
+        try {
+            await $(this.selector).click()
+        } catch (error) {
+            this.log.warn(error)
+        }
     }
 }
 
-export default new ConsentScreen(browser.isAndroid ? 'id=canvasm.myo2:id/ucHeader' :
-    AppScreen.iosPredicate('XCUIElementTypeButton', 'name', 'Alles'));
+export default new ConsentScreen();

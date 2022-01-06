@@ -1,9 +1,13 @@
 // weaves
 //
+// This has typescript errors because of hashCode.
+//
 // Actions0 is used in Login
 // The keys() method doesn't work on W3C apps, the class Actions0 does what it does before the send.
 //
 // Source0 is used in AppScreen and dumps pages.
+//
+// There is also a log that can be used.
 //
 // https://github.com/webdriverio/webdriverio/blob/9d2220e89144b0ca69232737957ad5fc32ca1300/packages/webdriverio/tests/commands/browser/keys.test.ts
 
@@ -14,10 +18,16 @@ const tmp = require('tmp');
 const path = require('path');
 
 export module Local {
+    export const log = logger('Source0')
+
     /**
      * Allegedly the same as Java.
      *
      * https://stackoverflow.com/posts/8076436/revisions
+     *
+     * It is fiddly to extend String and make it typesafe.
+     * https://stackoverflow.com/questions/39877156/how-to-extend-string-prototype-and-use-it-next-in-typescript
+     *
      */
     String.prototype.hashCode = function() {
         var hash = 0;
@@ -28,8 +38,6 @@ export module Local {
         }
         return hash;
     }
-
-    const log = logger('AppScreen')
 
     export class Actions0 {
 
@@ -111,7 +119,7 @@ export module Local {
         async dump(signature: string, name: string = "unnamed") {
             // Update the session-id
             const sid = browser.sessionId.toString().replace('_', '');
-            fs.writeFile("session.json-id", sid, function (err) {
+            fs.writeFile("session.json-id", sid, function (err: any) {
                 if (err) throw err;
                 log.info('session-id');
             });
@@ -129,7 +137,7 @@ export module Local {
                 name: name,
                 signature: signature
             }
-            const promise = fs.writeFile(p0, JSON.stringify(mark0), function (err) {
+            const promise = fs.writeFile(p0, JSON.stringify(mark0), function (err: any) {
                 if (err) throw err;
             });
 
@@ -137,7 +145,7 @@ export module Local {
             try {
                 const pic = await browser.takeScreenshot()
                 p0 = path.join(".", this.ddir, this.prefix + page.hashCode + this.postfix + "2")
-                const promise1 = fs.writeFile(p0, pic, function (err) {
+                const promise1 = fs.writeFile(p0, pic, function (err: any) {
                     if (err) throw err;
                 });
             } catch (e) {
@@ -148,7 +156,7 @@ export module Local {
             if (this.useTempFile) {
                 const nm = tmp.fileSync({mode: 0o664, prefix: this.prefix, postfix: this.postfix, tmpdir: this.ddir});
                 log.info("nm.name: " + nm.name)
-                const promise = fs.writeFile(nm.name, page.src, function (err) {
+                const promise = fs.writeFile(nm.name, page.src, function (err: any) {
                     if (err) {
                         log.warn('save-rnd: + ' + p0);
                     }
@@ -156,7 +164,7 @@ export module Local {
             } else { /* use a hashCode */
                 let p0 = path.join(".", this.ddir, this.prefix + page.hashCode + this.postfix)
 
-                const promise = fs.writeFile(p0, page.src, function (err) {
+                const promise = fs.writeFile(p0, page.src, function (err: any) {
                     if (err) {
                         log.warn('save-hash: + ' + p0);
                         // throw err;
@@ -168,3 +176,4 @@ export module Local {
 
     }
 }
+

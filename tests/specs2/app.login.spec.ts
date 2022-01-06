@@ -5,15 +5,22 @@ import HomeScreen from "../screenobjects/HomeScreen";
 import {Screens} from "../screenobjects/NewPage";
 import NewPage = Screens.NewPage;
 
+import {Local} from "../helpers/Source0";
+import log = Local.log;
+
 // weaves
-// Only successful if run from fullReset.
+// Only successful if run from a reset: for Android this is noReset is false, for iOS noReset is false.
+//
+// There is a test to see if the Consent Screen has been shown or not. I haven't managed to force the condition
+// to test this.
 
 // Illustrates the addition of commands to browser in AppScreen.
 // Drops in the debugger at the end of the login.
-// You should attach an Inspector and record what you do.
+// You can record what you do within the debugger, it can $().click() and using the
+// added commands, you can send keys using browser.actions0().
 
-const slow0 = 8000;
-const slow1 = 3*slow0;
+const slow0: number = 8000;
+const slow1: number = (5*slow0);
 
 describe('One session only - login and drop into debugger: ', () => {
     beforeEach(async () => {
@@ -21,35 +28,36 @@ describe('One session only - login and drop into debugger: ', () => {
         // Set the browser for the page dumper and add commands, catalogue resources
         AppScreen.browser = browser;
 
+        log.info('reset state: ' + AppScreen.reset0)
+
         // a moment to stabilize
         browser.pause(slow0)
         // browser.getSignature() does not work here.
         const newPage = await NewPage.getSignature("startup");
 
-        console.log('hashcode: from resource: ' + newPage.hashCode)
+        log.info('hashcode: from resource: ' + newPage.hashCode)
 
-        const t0 = await ConsentScreen.waitForIsShown(true, slow0); // Consent has an override
-        await LoginScreen.waitForIsShown(true);
-        console.log('hashcode: ' + await NewPage.getSignature("login").hashCode);
+        // t0 should always be true.
+        const t0 = await ConsentScreen.waitForIsShown(true, slow0);
+        if (t0) await ConsentScreen.assent()
+
+        await LoginScreen.waitForIsShownFatal(true, slow0);
+        log.info('hashcode: ' + await NewPage.getSignature("login").hashCode);
     });
 
     it('should be able login successfully', async () => {
-        // Always make sure you are on the right tab
-        await LoginScreen.radioButton('MOCK');
+        await LoginScreen.radioButton('MOCK')
         // Submit the data
         const password0 = 'test' + '\n';
         await LoginScreen.submitLoginForm1({username: 'o2udo00000002' + '\n', password: password0});
 
         // Logging in takes a long time
-        await LoginScreen.waitForIsShown(false, slow1);
+        await LoginScreen.waitForIsShownFatal(false, slow1);
 
         // And the homescreen should appear
-        await HomeScreen.waitForIsShown(true, (2*slow1));
+        await HomeScreen.waitForIsShownFatal(true, slow1);
         const page = await NewPage.getSignature("home")
-        console.log('hashcode: ' + page.hashCode);
-
-        const kPage = NewPage.pageOf(page.hashCode)
-        const clks = await kPage.clickables
+        log.info('hashcode: ' + page.hashCode);
 
         await browser.debug()
     });

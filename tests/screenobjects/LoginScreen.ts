@@ -22,17 +22,17 @@ class LoginScreen extends AppScreen {
         super(v0)
     }
 
-    // Android only
-    private get radioButtons() {
-        const v0 = browser.isAndroid ? 'id=canvasm.myo2:id/radio' :
-            AppScreen.iosPredicate('XCUIElementTypeButton', 'name', 'Mock')
-        return $$(v0);
-    }
-
     private get loginButton() {
         const v0 = browser.isAndroid ? 'id=canvasm.myo2:id/button_login' :
-        AppScreen.iosPredicate('XCUIElementTypeButton',
+            AppScreen.iosPredicate('XCUIElementTypeButton',
             'label', 'Einloggen');
+        return $(v0);
+    }
+
+    private get welcomeBack() {
+        const v0 = browser.isAndroid ? 'id="canvasm.myo2:id/login_welcome_back"' :
+            AppScreen.iosPredicate('XCUIElementTypeButton',
+                'label', 'welcome_back');
         return $(v0);
     }
 
@@ -116,9 +116,13 @@ class LoginScreen extends AppScreen {
         let u0 = new Actions0(username)
         let p0 = new Actions0(password)
 
-        await this.email.click();
-        // you can check with await this.keys2("ab")
-        await driver.performActions(u0.value);
+        // If not coming back, then fill in Mail field
+        const halfLoggedIn = await this.welcomeBack
+        if (typeof halfLoggedIn === undefined) {
+            this.log.debug("")
+            await this.email.click();
+            await driver.performActions(u0.value);
+        }
 
         // Add a pause, just to make sure the drag and drop is done
         await driver.pause(1000);
@@ -177,25 +181,36 @@ class LoginScreen extends AppScreen {
     }
 
     /**
-     * Find a radio button matching the string and click it.
+     * Find a radio button matching the string and clicks it.
+     *
+     * This is difficult for Android, see super.buttons. Fortunately there is another XPath.
+     *
+     * iOS can look up the string directly, it is case-sensitive though.
+     *
+     * Exceptions are thrown here.
+     *
      * @param type0
      */
     async radioButton(type0: string) {
-        let b1 = await this.radioButtons
-        this.log.info("buttons: count: " + b1.length)
-        if (b1.length == 1) { // iOS returns one button.
-            await b1[0].click()
-            return;
-        }
-        let promises = b1.map(async v => {
+        let b1 = await super.safely(super.buttons)
+        if (!b1) throw 'No buttons'
+
+        const buttonsSelector = browser.isAndroid ? 'id=canvasm.myo2:id/radio' : super.buttons ;
+
+        const buttons = await $$(buttonsSelector)
+
+        let promises = buttons.map(async v => {
             const tag = await v.getAttribute("text");
             return tag
         });
         const names = await Promise.all(promises)
-        const fmatch = (element) => element == type0;
-        const button0 = b1[(names.findIndex(fmatch))];
 
-        await button0.click();
+        const type1 = type0.toLowerCase()
+        const fmatch = (element: string) => element.toLowerCase() == type1;
+        const button0 = buttons[(names.findIndex(fmatch))];
+        if (button0 === undefined) throw `No button with text ${type0}`
+
+        await button0.click()
     }
 }
 
