@@ -29,6 +29,10 @@ class LoginScreen extends AppScreen {
         return $(v0);
     }
 
+    /**
+     * This should work but doesn't
+     * @private
+     */
     private get welcomeBack() {
         const v0 = browser.isAndroid ? 'id="canvasm.myo2:id/login_welcome_back"' :
             AppScreen.iosPredicate('XCUIElementTypeButton',
@@ -112,14 +116,21 @@ class LoginScreen extends AppScreen {
         await driver.pause(1000);
     }
 
+    /**
+     * Perform a login
+     *
+     * This captures the logic of a re-login where only the password is needed.
+     * @param username
+     * @param password
+     */
     async submitLoginForm1({username, password}: { username: string; password: string; }) {
         let u0 = new Actions0(username)
         let p0 = new Actions0(password)
 
-        // If not coming back, then fill in Mail field
-        const halfLoggedIn = await this.welcomeBack
-        if (typeof halfLoggedIn === undefined) {
-            this.log.debug("")
+        // If the email field is present, this is a full login - we must be running from a reset
+        // If not, then it is a Welcome Back.
+        const email0 = await this.email
+        if (! ('error' in email0)) {
             await this.email.click();
             await driver.performActions(u0.value);
         }

@@ -121,6 +121,8 @@ export default class AppScreen {
      *
      * This searches for the list and returns whether the length is greater than 0.
      *
+     * This should be safer than testing the error property of an Element.
+     *
      * @param selector0
      * @protected
      */
