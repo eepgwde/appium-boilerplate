@@ -24,10 +24,6 @@ const slow1: number = (5*slow0);
 
 describe('One session only - login and drop into debugger: ', () => {
     beforeEach(async () => {
-        // System initialization
-        // Set the browser for the page dumper and add commands, catalogue resources
-        AppScreen.browser = browser;
-
         log.info('reset state: ' + AppScreen.reset0)
 
         // a moment to stabilize

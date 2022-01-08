@@ -1,71 +1,9 @@
-# Stop Press
+# Design Notes
 
 weaves
 
 Appium testing on Cygwin for Android with W3C WebDriverIO
 Also on iOS
-
-## Changes
-
-Latest command-lines for jenkins on jenkins are these:
-
-For Android
-  rlwrap npx wdio run config/wdio.android.local2-app.conf.ts  --test app.login.spec.ts
-
-For iOS
-  rlwrap npx wdio run config/wdio.ios.local2-app.conf.ts  --test app.login.spec.ts
-
-The .conf.ts files are the capabilities parameters
-
-The port number, the logLevels and the outputDir are defined in wdio.shared.conf.ts
-
-They have been set for the Jenkins system as 4724, info and logs/.
-
-### Startup state
-
-The noReset and fullReset properties in capabilities determine the start-up sequence.
-This can now be interrogated using AppScreen.reset0, a static property. This should be the right logic:
-if not(fullReset) then not(noReset) else fullReset
-
-### iOS
-
-[Editor: this needs checking]
-
-iOS has a different type of selector because XPath is not fully supported, so this does not work for iOS
-
-  '*//XCUIElementTypeButton[contains(@name,"Cookie")]'
-
-and has to be replaced by this construction
-
-   const selector = `type == 'XCUIElementTypeSwitch' && name CONTAINS 'Cookie'`
-   const switch = `-ios predicate string:${selector}`
-   await $(switch).click()
-
-### Android Clickables
-
-iOS button selector is a single statement on a class. And the button class will have a name or label string. For
-Android, other elements may be clickable and not have text. The descriptive text may be below the clickable element.
-
-For the LoginScreen, this can be avoided by using a resource-id XPath selector. Elsewhere, another type of XPath has
-to be used - this is still on the TODO list.
-
-### Tester Tools
-
-The keys() method does not work on W3C servers, one must use
-performActions(). I have added a class Actions0 to do the
-formatting. This now has a full W3C Actions key, KeyUp, KeyDown
-implementation.
-
-It will also take a snapshot of XML pages to a directory ./pages/ on AppScreen.source().dump()
-It will also take an image capture of the screen.
-The debugger has been extended and can return a programmatic page object that can be interacted with.
-
-Many of the test files in specs{2,3}/ are now long sequences to get to points in the app for testing.
-
-The user is now a tester who is logging pages, images and input.
-
-This system interworks with https://github.com/eepgwde/robottestilo the Bash hlpr.sh for Android on
-Cygwin or Linux.
 
 ### Processes for Testers
 
@@ -74,7 +12,7 @@ Java/Cucumber system delivering to Jenkins. We are still in the prototyping phas
 test software, so we use a prototyping tool.
 
 There are practical advantages to using JavaScript and Mocha. The
-webdriver is wholly async in this implemenation, timeouts can be
+webdriver is wholly async in this implementation, timeouts can be
 adjusted and the Mocha test system is a programmable environment, so
 conditional processing is possible. In particular, a time-out can be
 captured in a try-catch and ignored.
@@ -105,7 +43,7 @@ to capture the XPath locations of the click operations.
 This system provides a test console onto the App. The system can be
 used like this:
 
-  rlwrap npx wdio run config/wdio.android.local2-app.conf.ts  --test app.login.spec.ts
+    rlwrap npx wdio run config/wdio.android.local2-app.conf.ts  --test app.login.spec.ts
 
 this config/ file uses the specs2/ directory and sets the reset rules as fullReset.
 
@@ -117,7 +55,7 @@ succeeds from a fullReset, it will dismiss the Consent page, and then
 logs on, views the homepage and goes into the debugger. It uses this
 invocation to do that.
 
-   await browser.debug
+     await browser.debug
 
 It can be used anywhere in the JavaScript and Mocha test source.
 
@@ -127,12 +65,12 @@ rlwrap provides emacs-like editing for the debugger. Ctrl-p for
 previous command, Ctrl-n for next. Arrows work.  Ctrl-a is beginning
 of the line, Ctrl-e is the end-of-line. Some basic commands are:
 
-   .help
-   .exit
+     .help
+     .exit
 
 rlwrap has history and can log its input and output with -l so this
 
-  rlwrap -l make.log npx wdio run config/wdio.android.local2-app.conf.ts  --test app.login.spec.ts
+    rlwrap -l make.log npx wdio run config/wdio.android.local2-app.conf.ts  --test app.login.spec.ts
 
 is my typical run. All of the console logging goes to make.log with the terminal session.
 
@@ -152,15 +90,15 @@ I have tried, it is not possible to pass an object from the test
 system into the debugger. (I had tried to get a new NewPage(), but
 just {} appeared.)
 
- $ let u0 = browser.actions0("username").value
+    $ let u0 = browser.actions0("username").value
 
 Returns an Actions0 object of the string "username" for use in a later call
 
- $ browser.performActions(u0)
+    $ browser.performActions(u0)
 
 Also, it is possible to snapshot the current page with this
 
- $ browser.getSignature(descr) // where descr: string
+    $ browser.getSignature(descr) // where descr: string
 
 The pages/ directory receives a file called w<hashcode>.xml{,1,2}
 The hashcode used in the filename is the hexadecimal hashcode of the string of the XML page.
@@ -184,16 +122,16 @@ android directory.
 At the end of specs2/app.login.spec.ts, you should be in the debugger
 in one shell and at the command-line in the android0 directory.
 
- hlpr xml text
+    hlpr xml text
 
 And there is button there:
 
- page.bttn.resource-id=canvasm.myo2:id/my_tariff_tile_details_btn
+    page.bttn.resource-id=canvasm.myo2:id/my_tariff_tile_details_btn
 
 Take the string "id=canvasm.myo2:id/my_tariff_tile_details_btn" and use it in the debugger
 
- const butn1 = $('id=canvasm.myo2:id/my_tariff_tile_details_btn')
- butn1.click()
+    const butn1 = $('id=canvasm.myo2:id/my_tariff_tile_details_btn')
+    butn1.click()
 
 Watch the App and you should see the "Details" button activity.
 
@@ -202,14 +140,14 @@ which one does the same. It should be the "Details" button top-right.
 
 So snapshot that in the debugger:
 
-  browser.getSignature('id=canvasm.myo2:id/my_tariff_tile_details_btn')
+    browser.getSignature('id=canvasm.myo2:id/my_tariff_tile_details_btn')
 
 You can also try the clicks in turn.
 
- > const clks1 = $$('//*[*/@clickable = "true"]')
- > clks1[0].click();
- > browser.getSignature("clks[0] short-menu")
- > browser.back()
+    const clks1 = $$('//*[*/@clickable = "true"]')
+    clks1[0].click();
+    browser.getSignature("clks[0] short-menu")
+    browser.back()
 
 clks1[2] is Ausland
 
@@ -243,13 +181,13 @@ NewPage.ts for the latest).
 
 This is a tuple formed by counts of particular elements on the screen.
 
-	$$('/hierarchy//*[*/@resource-id = "canvasm.myo2:id/radio"]')
-        $$('/hierarchy//*/android.widget.RadioButton')
-        $$('//*[*/@clickable = "true"]')
-	$$('//*[*/@text != ""]')
-	$$('//*[*/@resource-id != ""]')
-	$$('/hierarchy//*/android.widget.EditText')
-	$$('/hierarchy//*/android.widget.TextView')
+    $$('//*[@resource-id = "canvasm.myo2:id/radio"]')
+    $$('*//android.widget.RadioButton')
+    $$('//*[@clickable = "true"]')
+	  $$('//*[@text != ""]')
+	  $$('//*[@resource-id != ""]')
+	  $$('*//android.widget.EditText')
+	  $$('*//android.widget.TextView')
 
 There is function 'hlpr xml signatures' that will list the signatures from the
 XML files and as reported in the .xml1 files by appium-boilerplate.
@@ -260,31 +198,6 @@ It should be possible to match signatures with hashcodes with text fields to
 annotate which hashcode/signature is for which screen.
 
 Once you know what page you are on, you can add selector methods to obtain the elements.
-
-## Done
-
-Actions0 to browser.actions0(string)
-
-signatures, page dump and image dump : NewPage.getSignature() and browser.getSignature()
-
-Useful techniques. ConsentPage.waitForConsent() uses a wait for displayed in a try-except.
-It then collects the clickables and clicks the last but one.
-
-Scrolling. browser.scroll0(upward: boolean = true, band: number =
-40). This moves the screen upward, so appears to scroll down. Band is
-40% of the screen about the middle.
-
-XSLT. Clicking - find where clickable is true. Descend and log the
-TextView[@text]. Map the text to indices. clicks.xslt.
-
-iOS selectors
-
-## To Do
-
-Android clickables, trying to find associated text or content-desc or other descriptive field.
-
-Back is not active for Menu, but centre screen away from menu does the
-same. This should be a perform actions called clickAway() outside of the frame.
 
 # appium-boilerplate
 

@@ -1,11 +1,9 @@
 import logger from '@wdio/logger'
 import {Local} from "../helpers/Source0";
 
-import {Screens} from "../screenobjects/NewPage";
 import log0 = Local.log;
 import Source0 = Local.Source0;
 import Actions0 = Local.Actions0;
-import NewPage = Screens.NewPage;
 
 const path = require('path')
 
@@ -13,8 +11,6 @@ const WebDriver = require('webdriver').default
 
 /**
  * Base class of all Page objects and the Management interface Singleton for Source0
- *
- * Not the base class of NewPage.
  *
  * This implementation has a control plane singleton. It is constructed using the static setter on the class
  * for browser. It constructs Source0 and the class has a static getter browser() to get it back.
@@ -59,64 +55,12 @@ export default class AppScreen {
     return reset1
   }
 
-  /**
-   * The setter is used to configure the browser and adding custom commands.
-   *
-   * @param browser
-   */
-  static set browser(browser: WebdriverIO.Browser) {
-    AppScreen.browser_ = browser
-    AppScreen.source0_ = new Source0(browser)
-
-    // This feature is not used at the moment.
-    const rpath = path.join(process.cwd(), 'tests', 'resources',
-      browser.isAndroid ? 'android' : 'ios')
-    NewPage.initialize(rpath);
-
-    const factions = (s: string) => {
-      return AppScreen.perform0(s)
-    }
-    browser.addCommand('actions0', factions)
-
-    const fdump = async (name: string) => {
-      const pg = await NewPage.getSignature(name)
-      return pg.hashCode
-    }
-    browser.addCommand('getSignature', fdump)
-
-    const fmove = (dir0: boolean = true, band: number = 40) => {
-      AppScreen.move0(dir0, band)
-    }
-    browser.addCommand('scroll0', fmove)
-
-    // This relies upon the .properties files and may not work.
-    const fclickables = async () => {
-      const page = await AppScreen.source0_.hashCode()
-      const kPage = NewPage.pageOf(page.hashCode)
-      return Array.from(kPage.textsR.values())
-    }
-    browser.addCommand('clicks', fclickables)
-  }
-
   static get source(): Local.Source0 {
     return AppScreen.source0_;
   }
 
   get log() {
     return this.log_
-  }
-
-  /**
-   * Selector string to get the available clickable areas.
-   *
-   * With Android, this reveals the clickable regions. It is not much use.
-   *
-   * @private
-   */
-  protected get clickableRegions() {
-    const v0 = browser.isAndroid ? '//*[*/@clickable = "true"]' :
-      'XCUIElementTypeButton';
-    return v0;
   }
 
   /**
@@ -132,20 +76,6 @@ export default class AppScreen {
       'XCUIElementTypeButton';
     return v0;
   }
-
-  /*
-
-  It is possible to get the text of the child of a node that is clickable.
-
-  $$('//*[@clickable = "true"]')[0].getAttribute("class")
-  'androidx.appcompat.widget.LinearLayoutCompat'
-
-  $$('//*[*\/@clickable = "true"]/*')[0].getAttribute("class")
-  'android.widget.ImageView'
-  $$('//*[*\/@clickable = "true"]//*')[0].getAttribute("class")
-  ''
-
-  */
 
   /**
    * Simplifies text search.
@@ -184,7 +114,7 @@ export default class AppScreen {
 
   static async perform0(s: string) {
     const actions0 = new Actions0(s)
-    await AppScreen.browser_.performActions(actions0.value)
+    await browser.performActions(actions0.value)
     return s
   }
 
@@ -197,7 +127,7 @@ export default class AppScreen {
     const endPercentage = Math.trunc(50 + 0.5 * band);
     const anchorPercentage = band;
 
-    const {width, height} = await AppScreen.browser_.getWindowSize();
+    const {width, height} = await browser.getWindowSize();
     const anchor = Math.trunc(width * anchorPercentage / 100);
     const startPoint = Math.trunc(height * startPercentage / 100);
     const endPoint = Math.trunc(height * endPercentage / 100);
