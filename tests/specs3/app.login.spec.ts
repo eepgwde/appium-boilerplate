@@ -46,6 +46,9 @@ describe('Check reset state: ', () => {
             await HomeScreen.waitForIsShownFatal(true, slow1);
         }
 
+        const buttons = await HomeScreen.listButtons()
+        console.log(buttons.toString())
+
         await browser.debug()
     });
 

@@ -21,6 +21,8 @@ export module Screens {
     /**
      * resources files Bean for an Android page from Appium.
      *
+     * @TODO This is no longer needed.
+     *
      * This uses the output from _desc.resources made by click.xslt.
      *
      * In the resources files, each element is addressed as: clk.text.<node-id>.<node> ,
@@ -54,7 +56,7 @@ export module Screens {
          * sections().
          */
         public get clickables() {
-            const v0 = browser.isAndroid ? '//*[*/@clickable = "true"]' :
+            const v0 = browser.isAndroid ? '//*[@clickable = "true"]' :
                 '*//XCUIElementTypeButton' ;
             return $$(v0);
         }
@@ -148,7 +150,7 @@ export module Screens {
     }
 
     /**
-     * Another singleton: used to get the signatures of a page.
+     * Another singleton: used to get the signature of a page.
      *
      * It can also create a KnownPage from a hash-code.
      */
@@ -163,49 +165,49 @@ export module Screens {
 
         public get radioButtons() {
             // reliable
-            const v0 = browser.isAndroid ? '/hierarchy//*[*/@resource-id = "canvasm.myo2:id/radio"]'
+            const v0 = browser.isAndroid ? '//*[@resource-id = "canvasm.myo2:id/radio"]'
                 : '*//XCUIElementTypeButton';
             return $$(v0);
         }
 
         public get radioButton() {
             // unreliable - one screen misses all of them?
-            const v0 = browser.isAndroid ? '/hierarchy//*/android.widget.RadioButton' : '*//XCUIElementTypeButton';
+            const v0 = browser.isAndroid ? '*//android.widget.RadioButton' : '*//XCUIElementTypeButton';
             return $$(v0);
         }
 
         public get clickables() {
             // unreliable - one screen misses all of them?
-            const v0 = browser.isAndroid ? '//*[*/@clickable = "true"]' : '*//XCUIElementTypeButton';
+            const v0 = browser.isAndroid ? '//*[@clickable = "true"]' : '*//XCUIElementTypeButton';
             return $$(v0);
         }
 
         public get textNonEmpty() {
-            const v0 = browser.isAndroid ? '//*[*/@text != ""]' : '*//XCUIElementTypeStaticText';
+            const v0 = browser.isAndroid ? '//*[@text != ""]' : '*//XCUIElementTypeStaticText';
             // reliable
             return $$(v0);
         }
 
         public get resourceId() {
-            const v0 = browser.isAndroid ? '//*[*/@resource-id != ""]' : '*//XCUIElementTypeOther';
+            const v0 = browser.isAndroid ? '//*[@resource-id != ""]' : '*//XCUIElementTypeOther';
             // reliable
             return $$(v0);
         }
 
         public get editText() {
-            const v0 = browser.isAndroid ? '/hierarchy//*/android.widget.EditText' : '*//XCUIElementTypeTextField';
+            const v0 = browser.isAndroid ? '*//android.widget.EditText' : '*//XCUIElementTypeTextField';
             // and on iOS XCUIElementTypeSecureTextField
             return $$(v0);
         }
 
         public get textView() {
-            const v0 = browser.isAndroid ? '/hierarchy//*/android.widget.TextView' : '*//XCUIElementTypeStaticText';
+            const v0 = browser.isAndroid ? '*//android.widget.TextView' : '*//XCUIElementTypeStaticText';
             // reliable
             return $$(v0);
         }
 
         public get drawerLayout() {
-            const v0 = browser.isAndroid ? '/hierarchy//*/androidx.drawerlayout.widget.DrawerLayout' :
+            const v0 = browser.isAndroid ? '*//androidx.drawerlayout.widget.DrawerLayout' :
                 '*//XCUIElementTypeSegmentedControl';
             return $$(v0);
         }
