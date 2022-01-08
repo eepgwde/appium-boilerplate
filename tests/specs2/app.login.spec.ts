@@ -38,7 +38,7 @@ describe('One session only - login and drop into debugger: ', () => {
         if (t0) await ConsentScreen.assent()
 
         await LoginScreen.waitForIsShownFatal(true, slow0);
-        log.info('hashcode: ' + await NewPage.getSignature("login").hashCode);
+        log.info('hashcode: ' + (await NewPage.getSignature("login")).hashCode);
     });
 
     it('should be able login successfully', async () => {

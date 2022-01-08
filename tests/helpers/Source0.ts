@@ -155,13 +155,13 @@ export module Local {
       return this.destDir
     }
 
-    public async hashCode(): Promise<{ hashCode: string, src: string }> {
+    public async makeHashCode(): Promise<{ xhashCode: string, src: string }> {
       // Snapshot the page source.
       // There is an "await" warning, that can be mitigated with this use of Promise.all
       const [page] = await Promise.all([browser.getPageSource()])
       const hexString = page.hashCode().toString(16)
       return {
-        hashCode: hexString,
+        xhashCode: hexString,
         src: page
       };
     }
@@ -183,12 +183,12 @@ export module Local {
       // const page = await browser.getPageSource()
       // const hexString = page.hashCode().toString(16)
 
-      const page = await this.hashCode()
+      const page = await this.makeHashCode()
 
       // Generate a hash and add a signature and write to disk.
-      let p0 = path.join(".", this.destDir, this.prefix + page.hashCode + this.postfix + "1")
+      let p0 = path.join(".", this.destDir, this.prefix + page.xhashCode + this.postfix + "1")
       const mark0 = {
-        hashCode: page.hashCode,
+        hashCode: page.xhashCode,
         name: name,
         signature: signature
       }
@@ -199,7 +199,7 @@ export module Local {
       // Take an image
       try {
         const pic = browser.takeScreenshot()
-        p0 = path.join(".", this.destDir, this.prefix + page.hashCode + this.postfix + "2")
+        p0 = path.join(".", this.destDir, this.prefix + page.xhashCode + this.postfix + "2")
         fs.writeFile(p0, pic, function (err: any) {
           if (err) throw err;
         });
@@ -208,7 +208,6 @@ export module Local {
       }
 
       // Write out the page source to file
-
 
       if (this.useTempFile) { // not used.+
         const nm = tmp.fileSync({mode: 0o664, prefix: this.prefix, postfix: this.postfix, tmpdir: this.destDir});
@@ -219,7 +218,7 @@ export module Local {
           }
         });
       } else { /* use a hashCode */
-        let p0 = path.join(".", this.destDir, this.prefix + page.hashCode + this.postfix)
+        let p0 = path.join(".", this.destDir, this.prefix + page.xhashCode + this.postfix)
 
         fs.writeFile(p0, page.src, function (err: any) {
           if (err) {
@@ -228,7 +227,7 @@ export module Local {
           }
         });
       }
-      return page.hashCode
+      return page.xhashCode
     }
   }
 }

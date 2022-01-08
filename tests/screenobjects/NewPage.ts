@@ -208,14 +208,14 @@ export module Screens {
         if (u[1].length == 0) {
           u[1] = u[0].toString().padStart(2, '0')
         } else {
-          u[1] = u[1].trim()
+          u[1] = u[1].substring(0, 40).trim()
         }
         u0[i] = u
       })
 
-      // Duplicate keys
-
-      const k0 = u0.map( (u): string => u[1].trim())
+      // * Duplicate keys
+      // Get a simpler key, shorten it and trim it.
+      const k0 = u0.map( (u): string => u[1])
 
       if (XDuplications.hasDuplicates(k0)) {
         // then this lists duplicates
@@ -231,7 +231,7 @@ export module Screens {
       }
 
       // Convert to a Map. Order is preserved in the insertion order.
-      const v2 = new Map<string, WebdriverIO.Element>(); // Iterable to IterableIterator mismatch so set by hand?
+      const v2 = new Map<string, WebdriverIO.Element>(); // Iterable to IterableIterator mismatch so set by hand
       u0.forEach( (u) => v2.set(u[1], u[2]))
       super.log.info("clickables: count: " + t0.length + "; " + v2.size + "; " + u0.length)
 

@@ -7,10 +7,10 @@ Also on iOS
 
 1. Back is not active for Menu, but centre screen away from menu does the
 same. This should be a perform actions called clickAway() outside of the frame.
-2. iOS XPath Issues
+2. Implement iOS version of SingletonScreen. Implement clickables(), aka listButtons(), for iOS.
 
-
-iOS has a different type of selector because XPath is not fully supported, so this does not work for iOS
+iOS has a different type of selector - the `-ios predicate`. XPath may not be fully supported and the XML representation
+of an App is very different.
 
 '*//XCUIElementTypeButton[contains(@name,"Cookie")]'
 
@@ -27,8 +27,19 @@ Also on iOS
 
 ## Architecture
 
+The String prototype to support hashCode no longer reports an error. To avoid overloaded name clashes:
+String::hashCode() is an integer, xHashCode is a hexadecimal string of that integer.
+
+The properties code has been removed.
+
 There is now no need to perform any set-up. Source0 was refactored to take advantage of the global browser object.
-Source0 is now accessed with a singleton.
+Summarising:
+
+ - `AppScreen` references `NewPage`
+ - `NewPage` references `Source0`
+ - Source0 is now accessed with a singleton `instance`.
+
+Browser commands use these and are in wdio.shared.conf.ts
 
 ## Demonstrating Hooks and Test Sequences
 
@@ -62,11 +73,11 @@ Latest command-lines for weaves on melissa for Android only
 
 With reset, using specs2/
 
-    rlwrap npx wdio run config/wdio.android.local2-weaves.conf.ts  --test app.login.spec.ts
+    rlwrap npx wdio run config/wdio.android.local2-weaves.conf.ts  --spec app.login.spec.ts
 
 With no reset, using specs3/
 
-    rlwrap npx wdio run config/wdio.android.local2-weaves.conf.ts  --test app.login.spec.ts
+    rlwrap npx wdio run config/wdio.android.local2-weaves.conf.ts  --spec app.login.spec.ts
 
 ## Test configurations
 
@@ -74,11 +85,11 @@ Latest command-lines for jenkins on jenkins are these:
 
 For Android, with reset using specs2/
 
-    rlwrap npx wdio run config/wdio.android.local2-app.conf.ts  --test app.login.spec.ts
+    rlwrap npx wdio run config/wdio.android.local2-app.conf.ts  --spec app.login.spec.ts
 
 For iOS, with reset using specs2/
 
-    rlwrap npx wdio run config/wdio.ios.local2-app.conf.ts  --test app.login.spec.ts
+    rlwrap npx wdio run config/wdio.ios.local2-app.conf.ts  --spec app.login.spec.ts
 
 The .conf.ts files are the capabilities parameters
 

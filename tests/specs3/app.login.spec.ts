@@ -9,23 +9,25 @@ import SingletonScreen = Screens.SingletonScreen;
 // weaves
 // This can run from noReset == true
 //
-// With this arrangement, a developer has a fairly fast code-test cycle. The
+// With this arrangement, a developer has a fairly fast code-test cycle.
 
 const slow0 = 8000;
 const slow1 = 3 * slow0;
 
 describe('Consent and Login if needed ', () => {
-  before(async () => {
 
+  // This should only be run once for each test suite.
+  before(async () => {
     console.log('reset state: ' + AppScreen.reset0)
 
     // If Consent appears click it away and follow login sequence.
     const t0 = await ConsentScreen.waitForIsShown(true, slow0);
-    // If Consent appeared, we expect login, and home screen
+    // If Consent appeared, we dismiss it
     if (t0) {
       await ConsentScreen.assent()
     }
 
+    // If the Login appears, perform that and continue to the Home
     const t1 = await LoginScreen.waitForIsShown(true, slow0);
     if (t1) {
       await LoginScreen.waitForIsShownFatal(true, slow0);
@@ -42,7 +44,7 @@ describe('Consent and Login if needed ', () => {
   });
 
   beforeEach(async () => {
-    await NewPage.getSignature("first-test")
+    await NewPage.getSignature("new-test")
   });
 
   it('List some buttons ', async () => {

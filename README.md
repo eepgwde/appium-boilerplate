@@ -7,7 +7,7 @@ Also on iOS
 
 ### Processes for Testers
 
-This JavaScript/Mocha system is used as a configuration tool for the
+This JavaScript/Mocha system is used as a configuration tool for a
 Java/Cucumber system delivering to Jenkins. We are still in the prototyping phase for the
 test software, so we use a prototyping tool.
 
@@ -21,88 +21,98 @@ The goal is to provide a way that a Tester can record a Scenario and
 App Process Flow within the App.
 
 The Tester should use the automated Logon process provided by the
-Mocha specs2/app.login.spec.ts
+Mocha {specs2, specs3}/app.login.spec.ts. These demonstrate logging in to the app and present the debugger.
 
-At the end of the sequence, he is forced into the debugger, in which
-he can:
+In the debugger, it is possible:
 
-  - Capture the current page with browser.getSignature()
-  - Send and record keyboard input to the App with browser.performActions()
-  - Send and record click on elements with await $().click()
-  - Search for screen elements with the selectors $() and $$()
+  - Search for screen elements with the selectors `$()` and `$$()`
+  - Send and record click on elements with `$().click()`
+  - Capture the current page with `browser.getSignature()`
+  - Display the buttons that are available with: `browser.clickables()`
+  - Send and record keyboard input to the App with `browser.performActions()`
+  - Move up and down the App display with `browser.scroll0()`
 
-Try and record any interactions with the App using the debugger. In
-particular, the click() operations.
+If the Tester interacts with the App using the debugger, it is possible to get a record of interactions.
 
 The Appium session held in the debugger can be joined. You can use the
-Appium Inspector and "Attach to Session" and the recorder can be used
+Appium Inspector and "*Attach to Session*" and the recorder in that app can be used
 to capture the XPath locations of the click operations.
+
+This WebdriverIO W3C driver is much more suited to exploring an App in a systematic way.
 
 #### Running the Test System
 
 This system provides a test console onto the App. The system can be
 used like this:
 
-    rlwrap npx wdio run config/wdio.android.local2-app.conf.ts  --test app.login.spec.ts
+    rlwrap npx wdio run config/wdio.android.local2-app.conf.ts
+    rlwrap npx wdio run config/wdio.android.local2-app.conf.ts  --spec tests/specs2/app.login.spec.ts
 
-this config/ file uses the specs2/ directory and sets the reset rules as fullReset.
+The first invocation uses the config/ file to run all the Mocha test files in the tests/specs2/ directory.
+And runs from as if reset - that is specified as a capability.
 
-The use of "rlwrap" is not necessary. It is added to provide a better
-line editor for the debugger and can perform logging.
+The second invocation uses the same config/ file but runs one specific file.
 
-The script specs2/app.login.spec.ts has a simple sequence that
-succeeds from a fullReset, it will dismiss the Consent page, and then
+The use of `rlwrap` is not necessary. It is added to provide a better
+line editor for the debugger; `rlwrap` can also log to file.
+
+The script `specs2/app.login.spec.ts` has a simple sequence that
+succeeds from a *fullReset*, it will dismiss the Consent page, and then
 logs on, views the homepage and goes into the debugger. It uses this
 invocation to do that.
 
      await browser.debug
 
-It can be used anywhere in the JavaScript and Mocha test source.
+This invocation can be used anywhere in the JavaScript and Mocha test source.
 
-##### Using the editor: rlwrap
+##### Using the editor: `rlwrap` the Node Inspector
 
-rlwrap provides emacs-like editing for the debugger. Ctrl-p for
+`rlwrap` provides emacs-like editing for the debugger. Ctrl-p for
 previous command, Ctrl-n for next. Arrows work.  Ctrl-a is beginning
-of the line, Ctrl-e is the end-of-line. Some basic commands are:
+of the line, Ctrl-e is the end-of-line.
+
+The debugger itself is Node Inspector. It has basic commands
 
      .help
      .exit
 
-rlwrap has history and can log its input and output with -l so this
+`rlwrap` supports history and can log its input and output with `-l filename` so this
 
-    rlwrap -l make.log npx wdio run config/wdio.android.local2-app.conf.ts  --test app.login.spec.ts
+    rlwrap -l make.log npx wdio run config/wdio.android.local2-app.conf.ts  --spec tests/specs2/app.login.spec.ts
 
-is my typical run. All of the console logging goes to make.log with the terminal session.
+is a typical run. With this, all of the console logging goes to make.log with the terminal session.
 
 ##### Extra Browser Operations
 
-The browser object is accessible in the debugger just as in the main
-source using the variable name "browser".  The debugger command line
-also supports $() and $$() for selectors. And it can perform basic
-JavaScript, it cannot import.
+The browser object is accessible in the debugger and is globally available in the main
+source using the variable name `browser`. The debugger command line
+also supports `$()` and `$$()` for selectors. And it can perform basic
+JavaScript, it cannot import or perform await operations.
 
 The browser has had some custom commands added - see customCommand in the source for webdriverio.
 
  - actions0
  - getSignature
+ - scroll0
+ - clickables
 
-I have tried, it is not possible to pass an object from the test
-system into the debugger. (I had tried to get a new NewPage(), but
-just {} appeared.)
+As an example, use here is a sequence of operations: list the clickables, click a button and enter some data.
 
-    $ let u0 = browser.actions0("username").value
+    $ browser.clickables()
+    $ let clks = $$('//*[@clickable="true"]')
+    $ clks[2].click()
+    $ browser.performActions('Zypern\n')
 
-Returns an Actions0 object of the string "username" for use in a later call
-
-    $ browser.performActions(u0)
+The debugger interface is limited. It is not possible to pass a `Promise` object from the test
+system into the debugger. You can capture values, define functions and apply logic.
 
 Also, it is possible to snapshot the current page with this
 
-    $ browser.getSignature(descr) // where descr: string
+    $ browser.getSignature("mistaken identity") // where descr: string
 
 The pages/ directory receives a file called w<hashcode>.xml{,1,2}
 The hashcode used in the filename is the hexadecimal hashcode of the string of the XML page.
-The descriptive string "state of app" can be added as needed.
+Descriptive strings, like "mistaken identity", can be added as needed.
 
 The .xml file has the page. The .xml1 file has the hashcode and the
 signature. The .xml2 file has a base64 encoded image of the screen
@@ -116,15 +126,16 @@ the "hlpr" script as its session identifier if needed.
 If you have access to the hlpr.sh script, you can use it whilst in the debugger.
 
 If you have set up "hlpr" as described, it will be in the ./android0/
-directory. Make a soft link to bring the pages directory into the
-android directory.
+directory. Make a soft link to bring this system's pages/ directory as the
+android0/pages directory.
 
 At the end of specs2/app.login.spec.ts, you should be in the debugger
 in one shell and at the command-line in the android0 directory.
 
     hlpr xml text
 
-And there is button there:
+Another App might allow this interaction. There is a button in one of
+XPath queries:
 
     page.bttn.resource-id=canvasm.myo2:id/my_tariff_tile_details_btn
 
@@ -133,8 +144,7 @@ Take the string "id=canvasm.myo2:id/my_tariff_tile_details_btn" and use it in th
     const butn1 = $('id=canvasm.myo2:id/my_tariff_tile_details_btn')
     butn1.click()
 
-Watch the App and you should see the "Details" button activity.
-
+Watch the example App and you mgith see some activity from the "Details" button activity.
 Use browser.back() if necessary. Click the displayed buttons to see
 which one does the same. It should be the "Details" button top-right.
 
@@ -148,8 +158,6 @@ You can also try the clicks in turn.
     clks1[0].click();
     browser.getSignature("clks[0] short-menu")
     browser.back()
-
-clks1[2] is Ausland
 
 ### Tester to Developer
 
@@ -171,15 +179,15 @@ page was captured.
 The signature is some combination of these and other metrics, (see
 NewPage.ts for the latest).
 
-        this.radioButtons.length
-	    this.radioButton.length
-        this.clickables.length
-        this.textNonEmpty.length
-        this.resourceId.length
-        this.editText.length
-        this.textView.length
+    this.radioButtons.length
+    this.radioButton.length
+    this.clickables.length
+    this.textNonEmpty.length
+    this.resourceId.length
+    this.editText.length
+    this.textView.length
 
-This is a tuple formed by counts of particular elements on the screen.
+This is a tuple formed by counts of particular elements on the screen. For Android,
 
     $$('//*[@resource-id = "canvasm.myo2:id/radio"]')
     $$('*//android.widget.RadioButton')
@@ -194,10 +202,23 @@ XML files and as reported in the .xml1 files by appium-boilerplate.
 
 There is another method that will show the text fields within each file: 'hlpr xml texts'.
 
-It should be possible to match signatures with hashcodes with text fields to
+It should be possible to match signatures with the hashcode to
 annotate which hashcode/signature is for which screen.
 
 Once you know what page you are on, you can add selector methods to obtain the elements.
+
+### Finally, a message from the latest developer
+
+There is more discussion of the software architecture in the ChangeLog.md file.
+The JavaScript code has some useful comments.
+
+I have only made use of these source files.
+
+ - Page Object Models: Screens: HomeScreen.ts, LoginScreen.ts ConsentScreen.ts
+ - Components: AppScreen.ts, NewPage.ts, Source0.ts
+
+This JavaScript WebdriverIO W3C driver is much easier to learn Page Object Modelling than
+Java-Client driver.
 
 # appium-boilerplate
 
