@@ -162,8 +162,8 @@ export const config: WebdriverIO.Config = {
       return (dir0 ? 'page-down' : 'page-up')
     })
     browser.addCommand('getSignature', async (name: string): Promise<string> => {
-      const pg = await NewPage.getSignature(name) // writes the page, and takes a screenshot
-      return pg.hashCode
+      const hashCode = await NewPage.getSignature(name) // writes the page, and takes a screenshot
+      return hashCode
     })
     browser.addCommand('clickables', async (): Promise<string[]> => {
       const m0 = await SingletonScreen.instance.listButtons() // lists available buttons
