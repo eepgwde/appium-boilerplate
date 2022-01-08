@@ -36,7 +36,7 @@ describe('Consent and Login if needed ', () => {
       // Logging in takes a long time
       await LoginScreen.waitForIsShownFatal(false, slow1);
 
-      // And the homescreen should appear
+      // And the home screen should appear
       await HomeScreen.waitForIsShownFatal(true, slow1);
     }
   });
@@ -47,7 +47,7 @@ describe('Consent and Login if needed ', () => {
 
   it('List some buttons ', async () => {
     const buttons = await SingletonScreen.instance.listButtons()
-    console.log(buttons.toString())
+    console.log([...buttons.keys()].toString())
   });
 
   it('Straight to debugger ', async () => {

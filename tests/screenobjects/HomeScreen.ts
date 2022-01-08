@@ -14,10 +14,6 @@ class HomeScreen extends AppScreen {
         'Startseite'));
   }
 
-  private get drawerImage1() {
-    return $('id=canvasm.myo2:id/navigation_drawer_image_button');
-  }
-
 }
 
 export default new HomeScreen();

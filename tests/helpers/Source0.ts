@@ -30,9 +30,9 @@ export module Local {
    *
    */
   String.prototype.hashCode = function () {
-    var hash = 0;
-    for (var i = 0; i < this.length; i++) {
-      var character = this.charCodeAt(i);
+    let hash = 0;
+    for (let i = 0; i < this.length; i++) {
+      let character = this.charCodeAt(i);
       hash = ((hash << 5) - hash) + character;
       hash = hash & hash; // Convert to 32bit integer
     }
@@ -68,6 +68,56 @@ export module Local {
         id: "default keyboard"
       }
     }
+  }
+
+  /**
+   * Helper class to rename duplicate elements.
+   */
+  export class XDuplications {
+    readonly ss: string[];
+    readonly s: string;
+    indices: number[]
+
+    constructor(ss: string[], s: string) {
+      this.ss = ss
+      this.indices = []
+      this.s = s
+    }
+
+    indicesOf() {
+      let idx = this.ss.lastIndexOf(this.s);
+      const i0s = []
+      while (idx != -1) {
+        i0s.push(idx)
+        idx = (idx > 0 ? this.ss.lastIndexOf(this.s, idx - 1) : -1);
+      }
+      this.indices = i0s.reverse()
+    }
+
+    get renamed () : string[] {
+      this.indicesOf()
+      if (this.indices.length == 0) return this.ss
+
+      // drop the first element same as this.s, get the range of the remaining indices
+      // generate some replacements
+      const toChgIdx = [...this.indices].splice(1)
+      const idxes = [...Array(toChgIdx.length).keys()]
+      const s1s = idxes.map( (i) => `${this.s}(${i+1})`)
+
+      // clone the elements then replace the duplicates with the renamed
+      const nss = [...this.ss]
+      idxes.forEach( (i) => {
+        const idx = toChgIdx[i]
+        nss[idx] = s1s[i]
+      })
+
+      return nss
+    }
+
+    static findDuplicates = (k0: string[]) =>
+      k0.filter((item: string, index: number) => k0.indexOf(item) !== index)
+
+    static hasDuplicates = (k0: string[]) => (new Set(k0)).size !== k0.length
   }
 
   export class Source0 {
