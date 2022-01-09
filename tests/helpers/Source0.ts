@@ -1,11 +1,10 @@
 // weaves
 //
-// This has typescript errors because of hashCode.
+// Actions0 is a data container class. Used by performActions() in the Login procedure.
+// This because the keys() method doesn't work on W3C apps. The class Actions0 is a container and
+// restructures a string before sending it as key press sequences.
 //
-// Actions0 is used in Login
-// The keys() method doesn't work on W3C apps, the class Actions0 does what it does before sending.
-//
-// Source0 is used in AppScreen and dumps pages.
+// Source0 is used in AppScreen and dumps pages. This module is at the base of the architecture.
 //
 // There is also a log that can be used.
 //

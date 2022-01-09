@@ -10,27 +10,15 @@ const path = require('path')
 const WebDriver = require('webdriver').default
 
 /**
- * Base class of all Page objects and the Management interface Singleton for Source0
+ * Base class of all Screen (or Page Object Model) objects.
  *
- * This implementation has a control plane singleton. It is constructed using the static setter on the class
- * for browser. It constructs Source0 and the class has a static getter browser() to get it back.
+ * This provides two methods to detect screen presence.
  *
- *      AppScreen.browser = browser
- *      // and
- *      val browser1 = AppScreen.source.browser()
- *      // and browser1 === browser
- *
- *  Source0 is the logging utility with AppScreen.source().dump()
- *  which snapshots the page to a directory, usually pages/.
- *
- *  This method can also be called with hlpr app page. Source0 also writes out the session-id
- *  or sessionId. Source0 updates a file, session.json-id, every time it services dump().
- *
- * It has to be set early and is used by
+ * The Page Object Model has the requirement that the AppScreen holds a single definitive `selector`
+ * that must be present for that screen. This is implemented here with the selector member.
+ * The waitFor methods below provide that means of interaction.
  */
 export default class AppScreen {
-  protected static browser_: WebdriverIO.Browser
-  private static source0_: Local.Source0;
   public selector: string = "";
   /**
    * A common logger for all the pages.
@@ -55,16 +43,14 @@ export default class AppScreen {
     return reset1
   }
 
-  static get source(): Local.Source0 {
-    return AppScreen.source0_;
-  }
-
   get log() {
     return this.log_
   }
 
   /**
    * Selector string this should get all the clickable buttons.
+   *
+   * This is used by SingletonScreen::listButtons()
    *
    * Android is problematic: a clickable element can either have some text, or it will have indexed
    * components that contain text. A text field can also be text or content-desc.
@@ -156,7 +142,7 @@ export default class AppScreen {
   }
 
   /**
-   * Non-fatal timeout and drop to debugger.
+   * Non-fatal timeout
    *
    * Wait until a button appears and return false if not present.
    */
@@ -204,7 +190,7 @@ export default class AppScreen {
    *
    * This searches for the list and returns whether the length is greater than 0.
    *
-   * This should be safer than testing the error property of an Element.
+   * This should be safer than testing the `Element.error` property of an Element.
    *
    * @param selector0
    * @protected
