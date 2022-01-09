@@ -17,7 +17,7 @@ export const config: WebdriverIO.Config = {
   // on a remote machine).
   runner: 'local',
   hostname: 'localhost',
-  port: 4724,
+  port: 4723,
   path: '/wd/hub/',
   //
   // ==================
@@ -64,9 +64,10 @@ export const config: WebdriverIO.Config = {
   // - @wdio/sumologic-reporter
   // - @wdio/cli, @wdio/config, @wdio/utils
   // Level of logging verbosity: trace | debug | info | warn | error | silent
-  logLevel: 'debug',
-  logLevels: {webdriver: 'debug'},
-  //    webdriverio: 'debug',
+  logLevel: 'warn',
+  // logLevels: { 
+  //     webdriver: 'debug',
+  //     webdriverio: 'debug',
   // },
   outputDir: 'logs',
   //
@@ -83,12 +84,12 @@ export const config: WebdriverIO.Config = {
    * NOTE: This has been increased for more stable Appium Native app
    * tests because they can take a bit longer.
    */
-  waitforTimeout: 45000,
+  waitforTimeout: 60000,
   // Default timeout in milliseconds for request
   // if browser driver or grid doesn't send response
-  connectionRetryTimeout: 16000,
+  connectionRetryTimeout: 24000,
   // Default request retries count
-  connectionRetryCount: 2,
+  connectionRetryCount: 1,
   // Test runner services
   // Services take over a specific job you don't want to take care of. They enhance
   // your test setup with almost no effort. Unlike plugins, they don't add new

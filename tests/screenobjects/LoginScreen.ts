@@ -16,12 +16,15 @@ import Actions0 = Local.Actions0;
  */
 class LoginScreen extends AppScreen {
     constructor() { // [contains(@name,"Cookies")]'
-        const v0 = browser.isAndroid ?
+        super(browser.isAndroid ?
             'id=canvasm.myo2:id/login_feature_manager_container' :
             AppScreen.iosPredicate('XCUIElementTypeOther',
-                'name', 'loginNameInputField');
-        super(v0)
+                'name', 'loginNameInputField'));
+ 	this.textA = browser.isAndroid ? "text" : "name"
     }
+
+    // To find the button we want, we must look for a named attribute
+    readonly textA
 
     private get loginButton() {
         const v0 = browser.isAndroid ? 'id=canvasm.myo2:id/button_login' :
@@ -212,7 +215,7 @@ class LoginScreen extends AppScreen {
         const buttons = await $$(buttonsSelector)
 
         let promises = buttons.map(async v => {
-            const tag = await v.getAttribute("text");
+            const tag = await v.getAttribute(this.textA);
             return tag
         });
         const names = await Promise.all(promises)
