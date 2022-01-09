@@ -256,11 +256,8 @@ export module Screens {
       const t0 = await $$(selector0);
       // This is an ElementArray, I want to pass the type, ElementArray, but I can't find its declaration.
 
+      // texts0: text fields for buttons so far
       const texts0 = await this.collate(selector0, this.tags)
-
-      const i0s = Array(texts0.length).fill(1).reduce(this.accumulate, [])
-
-      const buttons = this.transpose([ i0s, texts0, t0 ])
 
       // * Find those that have no text (zero length), get their indices and build a child node selector string
       // for each of them.
@@ -276,6 +273,7 @@ export module Screens {
       const xtexts2 = await Promise.all(xtexts1)
       const xtexts3 = xtexts2.map( (x:string[]) => this.reducer(x).trim())
 
+      // Put the new values back, using indirect addressing into the array.
       const xtexts4 = this.transpose([xtext1idx, xtexts3])
 
       xtexts4.forEach( (t) => {
@@ -283,39 +281,26 @@ export module Screens {
         texts0[idx] = t[1]
       })
 
-      this.log.info(JSON.stringify(texts0))
-
-      const cols3 = cols2.map((col: string[]) => col.reduce(this.concatOrRight).trim())
-
-      // Put the elements p2 into u0 at the positions given in u1
-      // augment with the button element too
-      const idxes = [...Array(p2.length).keys()].map((i: number) => {
-        const idx = u1[i] - 1;
-        u0[idx] = [u1[i], p2[i], t0[i]];
-        return i
-      })
-
-      // If strings are still blank, deploy a structured numbered string 00
-      idxes.map((i) => {
-        const u = u0[i];
-        if (u[1].length == 0) {
-          u[1] = u[0].toString().padStart(2, '0')
-        } else {
-          u[1] = u[1].substring(0, 40).trim()
-        }
-        u0[i] = u
-      })
+      // * Any remaining blanks we fill with a padded string
+      const i0s = Array(texts0.length).fill(1).reduce(this.accumulate, [])
+        .map( (i: number) => i.toString().padStart(2, '0'))
+      const texts2 = this.transpose([ texts0, i0s])
+      const texts3 = texts2.map( (t: string[]) => (t[0].length > 0) ? t[0] : t[1] )
 
       // * Duplicate keys
       // Extract the strings to use as keys.
-      const k0 = u0.map((u): string => u[1])
-      const k1 = XDuplications.makeUnique(k0)
+      const texts4 = XDuplications.makeUnique(texts3)
 
-      // Convert to a Map. Order is preserved by insertion
-      const v2 = new Map<string, WebdriverIO.Element>(); // Iterable to IterableIterator mismatch so set by hand
-      u0.forEach((u) => v2.set(u[1], u[2]))
+      this.log.info(JSON.stringify(texts4))
+
+      // Convert to a Map.
+      // Iterable to IterableIterator mismatch so set by hand
+      // Order is preserved by insertion
+      const texts5 = this.transpose([texts4, t0])
+      const v2 = new Map<string, WebdriverIO.Element>();
+      texts5.forEach((t) => v2.set(t[0], t[1]))
       // this spots the duplicates too
-      super.log.debug("listButtons: count: " + t0.length + "; " + v2.size + "; " + u0.length)
+      super.log.debug("listButtons: count: " + t0.length + "; " + v2.size + "; " + texts5.length)
 
       return v2
     }
