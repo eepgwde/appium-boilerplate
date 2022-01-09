@@ -1,5 +1,6 @@
-import AppScreen from './AppScreen';
 import Gestures from '../helpers/Gestures';
+
+import AppScreen from './AppScreen';
 import {Local} from "../helpers/Source0";
 import Actions0 = Local.Actions0;
 

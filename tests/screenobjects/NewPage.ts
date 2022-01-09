@@ -1,25 +1,16 @@
 import {Local} from "../helpers/Source0";
-
-const fs = require('fs');
-const tmp = require('tmp');
-const path = require('path');
-
-// I can't find this
-// @ts-ignore
-import PropertiesReader = require('properties-reader');
 import AppScreen from './AppScreen';
-import logger from "@wdio/logger";
 
 /**
  * Provides for Screens.
  *
- * NewPage is a factory that produces KnownPage.
+ * NewPage creates a private page and generates a signature for its structure.
+ * SingletonScreen implements listButtons()
  */
 export module Screens {
 
   import Source0 = Local.Source0;
   import XDuplications = Local.XDuplications;
-  const log = logger('Screens')
 
   /**
    * Another singleton: used to get the signature of a page.
@@ -27,8 +18,7 @@ export module Screens {
    * It can also create a KnownPage from a hash-code.
    */
   export class NewPage {
-    private static page_: Screens.NewPage;
-
+    // static access only, except internally
     private constructor() {}
 
     public get radioButtons() {
@@ -82,9 +72,7 @@ export module Screens {
 
     static async getSignature(name: string): Promise<string> {
       const v0 = await (new NewPage()).signature()
-
-      const hash0 = await Source0.instance.dump(v0.toString(), name)
-      return hash0
+      return await Source0.instance.dump(v0.toString(), name)
     }
 
     async signature(): Promise<number[]> {
@@ -104,8 +92,7 @@ export module Screens {
         return v
       });
 
-      const v1 = await Promise.all(promises)
-      return v1
+      return await Promise.all(promises)
     }
   }
 
@@ -113,6 +100,8 @@ export module Screens {
    * Another singleton, this is for Screen processing and is adapted to Android or iOS.
    *
    * This singleton has a private implementation hierarchy: Android or iOS
+   *
+   * It only implements listButtons() this is the method that implements clickables().
    */
   export class SingletonScreen extends AppScreen {
     constructor() {
@@ -125,7 +114,6 @@ export module Screens {
     static get instance(): SingletonScreen {
       if (SingletonScreen._instance === undefined)
         SingletonScreen._instance = browser.isAndroid ? new AndroidScreen() : new iOSScreen()
-
       return SingletonScreen._instance
     }
 
@@ -133,25 +121,42 @@ export module Screens {
       return new Map<string, WebdriverIO.Element>()
     }
 
-  }
+    // Makes a string from null.
+    public stringOrEmpty = (x: any) => (x != null) ? x : ""
 
-  class iOSScreen extends SingletonScreen {
-  }
+    // Reduce two strings.
+    public concatOrRight = (x: string, y: string) => (x.length > 0) ? `${x} ${y}` : y
 
-  class AndroidScreen extends SingletonScreen {
+    // join null and strings with coalesce separators
+    public reducer = (r11: string[]) => r11.map((x) => this.stringOrEmpty(x)).reduce(this.concatOrRight, "")
 
-    async joiner0(t0: any[], fld: string) {
-      const t10 = t0.map((x) => x.getAttribute(fld))
-      const t20 = await Promise.all(t10).then((values) => values)
-      return t20
-    }
-
-    async joiner1(s0: string, fld: string): Promise<string> {
-      const r0 = await $$(s0)
+    /**
+     * Get a named attribute from a list of Element specified by the string selector.
+     *
+     * Note: this is inefficient. It could be given an ElementArray in place of the string selector0.
+     * It is used for two purposes.
+     *
+     * @param selector0 this is a string to obtain an ElementArray
+     * @param fld the name of the attribute to fetch.
+     */
+    async fetchElements(selector0: string, fld: string): Promise<string[]> {
+      const r0 = await $$(selector0)
       const r10 = r0.map((x) => x.getAttribute(fld))
-      const r11 = await Promise.all(r10).then((values) => values)
-      return r11.map((x) => this.f0(x)).reduce(this.f1, "")
+      return await Promise.all(r10).then((values) => values)
     }
+  }
+
+  /**
+   * @TODO
+   */
+  class iOSScreen extends SingletonScreen {}
+
+  /**
+   * Implements listButtons() for Android.
+   *
+   * Android has a more complex page structure and slightly different attribute names.
+   */
+  class AndroidScreen extends SingletonScreen {
 
     /**
      * Find the text strings associated with a selector string.
@@ -179,31 +184,36 @@ export module Screens {
 
       // * See what top-level text/desc is available.
       // Merge them together using a reduce function and prefix with the index+1
-      const [t20, t21] = await Promise.all([this.joiner0(t0, "text"), this.joiner0(t0, "content-desc")])
+      const [t20, t21] = await Promise.all([this.fetchElements(selector0, "text"),
+        this.fetchElements(selector0, "content-desc")])
       const u0 = [...Array(t0.length).keys()].map((i) =>
-        [i + 1, [this.f0(t20[i]), this.f0(t21[i])].reduce(this.f1), t0[i]])
+        [i + 1, [this.stringOrEmpty(t20[i]), this.stringOrEmpty(t21[i])].reduce(this.concatOrRight), t0[i]])
 
       // * Find those that have no text (zero length), get their indices and build a child node selector string
+      // for each of them.
       const u1 = u0.filter((u) => u[1].length == 0).map((u) => u[0])
-      const f2 = (i: number) => `(${selector0})[${i}]//*`
-      const s0 = u1.map((u) => f2(u))
+      const fToSelect = (i: number) => `(${selector0})[${i}]//*`
+      const s0 = u1.map((u) => fToSelect(u))
 
       // For each of those search strings, get the text and content-desc and reduce it to one string.
       const p0 = s0.map(async (s) => {
-        return await Promise.all([this.joiner1(s, "text"), this.joiner1(s, "content-desc")])
+        return await Promise.all([
+          this.reducer(await this.fetchElements(s, "text")),
+          this.reducer(await this.fetchElements(s, "content-desc"))])
       });
       const p1 = await Promise.all(p0)
-      const p2 = p1.map((p) => p.reduce(this.f1))
+      const p2 = p1.map((p) => p.reduce(this.concatOrRight).trim())
 
       // Put the elements p2 into u0 at the positions given in u1
-      const idxs = [...Array(p2.length).keys()].map((i: number) => {
+      // augment with the button element too
+      const idxes = [...Array(p2.length).keys()].map((i: number) => {
         const idx = u1[i] - 1;
         u0[idx] = [u1[i], p2[i], t0[i]];
         return i
       })
 
-      // If any are still blank use a string like 00
-      idxs.map((i) => {
+      // If strings are still blank, deploy a structured numbered string 00
+      idxes.map((i) => {
         const u = u0[i];
         if (u[1].length == 0) {
           u[1] = u[0].toString().padStart(2, '0')
@@ -214,35 +224,29 @@ export module Screens {
       })
 
       // * Duplicate keys
-      // Get a simpler key, shorten it and trim it.
-      const k0 = u0.map( (u): string => u[1])
+      // Extract the strings to use as keys.
+      const k0 = u0.map((u): string => u[1])
 
       if (XDuplications.hasDuplicates(k0)) {
-        // then this lists duplicates
         const dupes = XDuplications.findDuplicates(k0);
-        let k1 = [...k0]
-        dupes.forEach( (x) => {
+        let k1 = [...k0] // clone to update
+        dupes.forEach((x) => {
           const dupe0 = new XDuplications(k1, x)
-          k1 = dupe0.renamed
+          k1 = dupe0.renamed // update
         });
-        [...Array(u0.length).keys()].forEach( (i) => {
+        // And put the updated keys back into master collection
+        [...Array(u0.length).keys()].forEach((i) => {
           u0[i][1] = k1[i]
         });
       }
 
-      // Convert to a Map. Order is preserved in the insertion order.
+      // Convert to a Map. Order is preserved by insertion
       const v2 = new Map<string, WebdriverIO.Element>(); // Iterable to IterableIterator mismatch so set by hand
-      u0.forEach( (u) => v2.set(u[1], u[2]))
-      super.log.info("clickables: count: " + t0.length + "; " + v2.size + "; " + u0.length)
+      u0.forEach((u) => v2.set(u[1], u[2]))
+      // this spots the duplicates too
+      super.log.debug("listButtons: count: " + t0.length + "; " + v2.size + "; " + u0.length)
 
       return v2
     }
-
-    // Makes a string from null.
-    private f0 = (x: any) => (x != null) ? x : ""
-
-    // Reduce two strings.
-    private f1 = (x: string, y: string) => (x.length > 0) ? `${x} ${y}` : y
   }
-
 }

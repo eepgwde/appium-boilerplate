@@ -2,12 +2,7 @@ import logger from '@wdio/logger'
 import {Local} from "../helpers/Source0";
 
 import log0 = Local.log;
-import Source0 = Local.Source0;
 import Actions0 = Local.Actions0;
-
-const path = require('path')
-
-const WebDriver = require('webdriver').default
 
 /**
  * Base class of all Screen (or Page Object Model) objects.
