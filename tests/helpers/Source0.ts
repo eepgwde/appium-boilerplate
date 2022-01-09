@@ -119,6 +119,18 @@ export module Local {
       k0.filter((item: string, index: number) => k0.indexOf(item) !== index)
 
     static hasDuplicates = (k0: string[]) => (new Set(k0)).size !== k0.length
+
+    public static makeUnique(k0: string[]): string[] {
+      if (!XDuplications.hasDuplicates(k0)) return k0
+
+      const dupes = XDuplications.findDuplicates(k0);
+      let k1 = [...k0] // clone to update
+      dupes.forEach((x) => {
+        const dupe0 = new XDuplications(k1, x)
+        k1 = dupe0.renamed // update
+      });
+      return k1
+    }
   }
 
   export class Source0 {

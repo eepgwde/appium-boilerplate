@@ -19,7 +19,8 @@ export module Screens {
    */
   export class NewPage {
     // static access only, except internally
-    private constructor() {}
+    private constructor() {
+    }
 
     public get radioButtons() {
       // reliable
@@ -130,6 +131,54 @@ export module Screens {
     // join null and strings with coalesce separators
     public reducer = (r11: string[]) => r11.map((x) => this.stringOrEmpty(x)).reduce(this.concatOrRight, "")
 
+    public transpose(matrix: any[][]) {
+      return matrix.reduce((prev, next) => next.map((item, i) =>
+        (prev[i] || []).concat(next[i])
+      ), []);
+    }
+
+    /**
+     * Accumulate a sum in an array, starting from 1
+     *
+     * for a0 = Array(3).fill(1), this yields b0 as 1, 2, 3
+     * `const b0 = a0.reduce(accumulate, []);`
+     */
+    public accumulate = (r: number[], c:number, i:number): number[] => {
+      r.push((r[i-1] || 0) + c)
+      return r
+    }
+
+    /**
+     * Prepends the elements of the list with the element's index in the list.
+     * @param list
+     */
+    public indexed(list: any[], offset: number = 0) {
+      // Make an array of length, and make it an incremental sequence
+      const i0 = Array(list.length).fill(1)
+      const i1 = i0.reduce(this.accumulate, [])
+      const i2 = i1
+        .map( (i: number) => i - 1) // so that it starts from 0
+        .map( (i: number) => i + offset) // so that it starts from offset
+
+      // prepend and transpose
+      return this.transpose([ i2, list])
+    }
+
+    /**
+     * Curries an accumulator function, it starts from c0.
+     *
+     * This curried version can support string as well as number.
+     *
+     * `const fb = makeAccumulator('b')`
+     *
+     * for a0 = Array('3).fill('a'), this yields b0 as 'ba', 'baa', 'baaa'
+     * `const b0 = a0.reduce(fb, []);`
+     */
+    public makeAccumulator = (c0: any = 0) => (r: any[], c:any, i:any) => {
+      r.push((r[i-1] || c0) + c)
+      return r
+    }
+
     /**
      * Get a named attribute from a list of Element specified by the string selector.
      *
@@ -142,14 +191,36 @@ export module Screens {
     async fetchElements(selector0: string, fld: string): Promise<string[]> {
       const r0 = await $$(selector0)
       const r10 = r0.map((x) => x.getAttribute(fld))
-      return await Promise.all(r10).then((values) => values)
+      const v0 = await Promise.all(r10).then((values) => values)
+      return v0.map( (v) => this.stringOrEmpty(v))
     }
+
+    // Collate the attribute values.
+    //
+    // For each of the attribute names, (column names or the tags), fetch the element and get the attributes
+    async collate(selector0: string, tags: string[]): Promise<string[]> {
+      // Columns of attributes for rows of element
+      const c0 = tags.map((tag) => this.fetchElements(selector0, tag))
+      const c1 = await Promise.all(c0)
+      const c2 = this.transpose(c1)
+      const c3 = c2.map((c) => c.reduce(this.concatOrRight))
+      return c3
+    }
+
   }
 
   /**
    * @TODO
    */
-  class iOSScreen extends SingletonScreen {}
+  class iOSScreen extends SingletonScreen {
+    readonly tags : string[] = [ 'name', 'label' ]
+
+    override async listButtons(selector0: string = this.buttons): Promise<Map<string, WebdriverIO.Element>> {
+
+      return new Map<string, WebdriverIO.Element>()
+    }
+
+  }
 
   /**
    * Implements listButtons() for Android.
@@ -157,6 +228,8 @@ export module Screens {
    * Android has a more complex page structure and slightly different attribute names.
    */
   class AndroidScreen extends SingletonScreen {
+
+    readonly tags : string[] = [ 'text', 'content-desc' ]
 
     /**
      * Find the text strings associated with a selector string.
@@ -180,29 +253,39 @@ export module Screens {
      */
     override async listButtons(selector0: string = this.buttons): Promise<Map<string, WebdriverIO.Element>> {
       // * List the buttons.
-      const t0 = await $$(selector0); // This is ElementArray, I can't find the type
+      const t0 = await $$(selector0);
+      // This is an ElementArray, I want to pass the type, ElementArray, but I can't find its declaration.
 
-      // * See what top-level text/desc is available.
-      // Merge them together using a reduce function and prefix with the index+1
-      const [t20, t21] = await Promise.all([this.fetchElements(selector0, "text"),
-        this.fetchElements(selector0, "content-desc")])
-      const u0 = [...Array(t0.length).keys()].map((i) =>
-        [i + 1, [this.stringOrEmpty(t20[i]), this.stringOrEmpty(t21[i])].reduce(this.concatOrRight), t0[i]])
+      const texts0 = await this.collate(selector0, this.tags)
+
+      const i0s = Array(texts0.length).fill(1).reduce(this.accumulate, [])
+
+      const buttons = this.transpose([ i0s, texts0, t0 ])
 
       // * Find those that have no text (zero length), get their indices and build a child node selector string
       // for each of them.
-      const u1 = u0.filter((u) => u[1].length == 0).map((u) => u[0])
-      const fToSelect = (i: number) => `(${selector0})[${i}]//*`
-      const s0 = u1.map((u) => fToSelect(u))
+      // submit that string, collate the results
+      const texts1 = this.indexed(texts0, 0)
 
-      // For each of those search strings, get the text and content-desc and reduce it to one string.
-      const p0 = s0.map(async (s) => {
-        return await Promise.all([
-          this.reducer(await this.fetchElements(s, "text")),
-          this.reducer(await this.fetchElements(s, "content-desc"))])
-      });
-      const p1 = await Promise.all(p0)
-      const p2 = p1.map((p) => p.reduce(this.concatOrRight).trim())
+      const xtext1idx = texts1.filter((t) => t[1].length == 0).map( (t) => t[0])
+      const fToSelect = (i: number) => `(${selector0})[${i}]//*`
+      const xtexts1s = xtext1idx.map( (i:number) => fToSelect(i+1))
+
+      // For each of those search strings, fetch and collate the tags and reduce it to one string.
+      const xtexts1 = xtexts1s.map(async (col: string) => await this.collate(col, this.tags));
+      const xtexts2 = await Promise.all(xtexts1)
+      const xtexts3 = xtexts2.map( (x:string[]) => this.reducer(x).trim())
+
+      const xtexts4 = this.transpose([xtext1idx, xtexts3])
+
+      xtexts4.forEach( (t) => {
+        const idx = t[0]
+        texts0[idx] = t[1]
+      })
+
+      this.log.info(JSON.stringify(texts0))
+
+      const cols3 = cols2.map((col: string[]) => col.reduce(this.concatOrRight).trim())
 
       // Put the elements p2 into u0 at the positions given in u1
       // augment with the button element too
@@ -226,19 +309,7 @@ export module Screens {
       // * Duplicate keys
       // Extract the strings to use as keys.
       const k0 = u0.map((u): string => u[1])
-
-      if (XDuplications.hasDuplicates(k0)) {
-        const dupes = XDuplications.findDuplicates(k0);
-        let k1 = [...k0] // clone to update
-        dupes.forEach((x) => {
-          const dupe0 = new XDuplications(k1, x)
-          k1 = dupe0.renamed // update
-        });
-        // And put the updated keys back into master collection
-        [...Array(u0.length).keys()].forEach((i) => {
-          u0[i][1] = k1[i]
-        });
-      }
+      const k1 = XDuplications.makeUnique(k0)
 
       // Convert to a Map. Order is preserved by insertion
       const v2 = new Map<string, WebdriverIO.Element>(); // Iterable to IterableIterator mismatch so set by hand
