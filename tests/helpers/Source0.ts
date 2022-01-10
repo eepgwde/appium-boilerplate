@@ -16,6 +16,8 @@ const fs = require('fs');
 const tmp = require('tmp');
 const path = require('path');
 
+import {Site0} from '../../config/wdio.shared.local.appium.conf'
+
 export module Local {
   export const log = logger('Source0')
 
@@ -207,15 +209,16 @@ export module Local {
         if (err) throw err;
       });
 
-      // Take an image
-      try {
-        const pic = browser.takeScreenshot()
-        p0 = path.join(".", this.destDir, this.prefix + page.xhashCode + this.postfix + "2")
-        fs.writeFile(p0, pic, function (err: any) {
-          if (err) throw err;
-        });
-      } catch (e) {
-        log.warn("failed to take screenshot: " + p0)
+      // Take an image - now storing directly to file.
+      if (Site0.isScreenShot) {
+        try {
+          const p0 = path.join(".", this.destDir, this.prefix + page.xhashCode + ".png")
+          if (typeof p0 === "string") {
+            await browser.saveScreenshot(p0)
+          }
+        } catch (e) {
+          log.warn("failed to take screenshot: " + p0 + "; " + e)
+        }
       }
 
       // Write out the page source to file
