@@ -112,26 +112,43 @@ export module Screens {
   const stringOrEmpty = (x: any) => (x != null) ? x : ""
 
   // If the string is null or zero-length, return the default.
+  //
+  // There is a mistake with this, the value may not be something that supports length.
   const stringOrDefault = (value: any, default0: string = ""): string =>
     (stringOrEmpty(value).length > 0) ? value : default0
 
-  // Reduce two strings.
+  // join two strings with space if the first is non-empty
   const concatOrRight = (x: string, y: string) => (x.length > 0) ? `${x} ${y}` : y
 
-  // join null and strings with coalesce separators
-  const reducer = (r11: string[]) => r11.map((x) => stringOrEmpty(x)).reduce(concatOrRight, "")
+  // for an array of null/strings, make the nulls empty strings and then join
+  const reducer = (r11: any[]) => r11.map((x) => stringOrEmpty(x)).reduce(concatOrRight, "")
 
   // Transpose columns to rows
   //
-  // This is a difficult one
+  // This is a difficult implementation to understand. It makes use of a feature of map() that provides the index.
+  // It is used here, just for the index of the item in the row.
   // https://stackoverflow.com/questions/17428587/transposing-a-2d-array-in-javascript
   const transpose = (matrix: any[][]) => {
-    const x0 = matrix.reduce((prev, next) => next.map((item, i) => (prev[i] || []).concat(next[i])), []);
+    const x0 = matrix.reduce((prev, next) =>
+      next.map((item, i) => (prev[i] || []).concat(next[i])),
+      []);
     return x0
   }
 
   /**
    * Prepends the elements of the list with the element's index in the list.
+   *
+   * This is the native version.
+   * @param list an array
+   * @param offset array indexing starts at 0 by default, other systems may use 1.
+   */
+  const indexed0 = (list: any[], offset: number = 0) => list.map( (item:any, i:number) => [ i+offset, item])
+
+  /**
+   * Prepends the elements of the list with the element's index in the list.
+   *
+   * See indexed0 for the native trick. This is a column join.
+   *
    * @param list
    */
   const indexed = (list: any[], offset: number = 0) => {
@@ -155,12 +172,19 @@ export module Screens {
    *
    * for a0 = Array('3).fill('a'), this yields b0 as 'ba', 'baa', 'baaa'
    * `const b0 = a0.reduce(fb, []);`
+   *
+   * Note: not used.
    */
   const makeAccumulator = (c0: any = 0) => (r: any[], c: any, i: any) => {
     r.push((r[i - 1] || c0) + c)
     return r
   }
 
+  /**
+   * Create a sequence of padded strings starting from 0.
+   * @param length
+   * @param padN
+   */
   const indexedStrings = (length: number, padN: number = 2): string[] => {
     const i0s = Array(length).fill(1)
     const i1s = i0s.reduce(accumulate, [])
@@ -168,16 +192,26 @@ export module Screens {
     return i2s
   }
 
-  const addDefaults = (texts0: string[], fDefaults: (length: number, padN?: number) => string[]) => {
-    const i0s = fDefaults(texts0.length)
-    const texts2 = transpose([texts0, i0s])
+  /**
+   * Empty strings are replaced with defaults.
+   *
+   * This uses a column join.
+   * @param texts is an array of strings
+   * @param fDefaults is a function, usually indexedStrings()
+   */
+  const addDefaults = (texts: string[], fDefaults: (length: number, padN?: number) => string[]) => {
+    const i0s = fDefaults(texts.length)
+    const texts2 = transpose([texts, i0s])
     return texts2.map((t: string[]) => stringOrDefault(t[0], t[1]))
   }
 
   /**
-   * Another singleton, this is for Screen processing and is adapted to Android or iOS.
+   * This singleton is adapted to Android or iOS. It is used for processing the Screen objects.
    *
-   * This singleton has a private implementation hierarchy: Android or iOS
+   * It has a private implementation hierarchy: Android or iOS. The field members of the singleton base class
+   * are specific to Android or iOS, so there should be no need to have field members
+   *
+   * It inherits from AppScreen just for the buttons member.
    *
    * It only implements listButtons() this is the method that implements clickables().
    */
@@ -209,19 +243,19 @@ export module Screens {
      * It is used for two purposes.
      *
      * @param selector0 this is a string to obtain an ElementArray
-     * @param fld the name of the attribute to fetch.
+     * @param attr the name of the attribute to fetch.
      */
-    async fetchElements(selector0: string, fld: string): Promise<string[]> {
+    async fetchElements(selector0: string, attr: string): Promise<string[]> {
       const r0 = await $$(selector0)
-      const r10 = r0.map((x) => x.getAttribute(fld))
+      const r10 = r0.map((x) => x.getAttribute(attr))
       const v0 = await Promise.all(r10).then((values) => values)
       return v0.map((v) => stringOrEmpty(v))
     }
 
-    // For each of the attribute names, (column names or the tags), fetch the element and get the attributes
-    async collate(selector0: string, tags: string[]): Promise<string[]> {
+    // For each of the attribute names, fetch the elements given by selector0 and get the attributes.
+    async collate(selector0: string, attrs: string[]): Promise<string[]> {
       // Columns of attributes for rows of element
-      const c0 = tags.map((tag) => this.fetchElements(selector0, tag))
+      const c0 = attrs.map((attr) => this.fetchElements(selector0, attr))
       const c1 = await Promise.all(c0)
       const c2 = transpose(c1)
       const c3 = c2.map((c) => c.reduce(concatOrRight))
@@ -231,31 +265,11 @@ export module Screens {
     /**
      * Find the text strings associated with a selector string.
      *
-     * This is only really needed on Android. The selector string is usually the clickable buttons string.
-     * The implementation only differs by a function, specialize(), to deal with blank strings.
-     *
-     * First list the buttons at top-level and call specialize. If there is some text to describe the button then
-     * no further processing is needed. Otherwise, the Android implementation does the following.
-     *
-     * List all the descendants of each button in turn, and get the text attributes.
+     * First list the buttons at top-level and call specialize(). If there is some text to describe the button then
+     * no further processing is needed by specialize().
      *
      * After specialize(), if there is still no string, then give it a numbered string.
      * After that, rename any duplicates. Then construct a map for the caller.
-     *
-     * For Android, this is based on the XPath, that it is possible to get the text of the child of a node that is
-     * clickable.
-     *
-     * $$('//*[@clickable = "true"]')[0].getAttribute("class")
-     * 'androidx.appcompat.widget.LinearLayoutCompat'
-     *
-     * $$('//*[*\/@clickable = "true"]/*')[0].getAttribute("class")
-     * 'android.widget.ImageView'
-     * $$('//*[*\/@clickable = "true"]//*')[0].getAttribute("class")
-     * ''
-     *
-     * This implementation uses the functional programming paradigm. A transpose method is used a lot, it may
-     * not be very performant. The basic trick is transpose([col1, col2]) gives a sequence of rows where
-     * row[i] = [ col1[i], col2[i] ]
      *
      * @param selector0
      * @protected
@@ -266,20 +280,21 @@ export module Screens {
       // texts0: text fields for buttons so far
       let texts0 = await this.collate(selector0, this.tags)
 
+      // the specialization usually deals with blank strings, but it might do other formatting, so don't test
+      // for empty fields at this level.
       texts0 = await this.specialize(texts0, selector0)
 
-      // * Any remaining blanks we fill with a padded string
+      // Any remaining blanks we fill with a padded string
       const texts2 = addDefaults(texts0, indexedStrings)
 
-      // * Duplicate keys
+      // Duplicate keys
       const texts4 = XDuplications.makeUnique(texts2)
 
-      // * Convert to a Map.
-      // This is copied, because no ElementArray type.
+      // Convert to a Map.
       const texts5 = transpose([texts4, t0])
       const v2 = await this.listButtons0() // provides an empty map
       texts5.forEach((t) => v2.set(t[0], t[1]))
-      // this spots the duplicates too
+      // this spots the duplicates
       super.log.debug("listButtons: count: " + t0.length + "; " + v2.size + "; " + texts5.length)
 
       return v2
@@ -298,15 +313,11 @@ export module Screens {
   /**
    * Implements listButtons for iOS.
    *
-   * There is only one level for iOS.
+   * There is only one level for iOS, so no specialization.
    */
   class iOSScreen extends SingletonScreen {
     constructor() {
       super(['name', 'label'])
-    }
-
-    override async specialize(texts: string[], selector0: string): Promise<string[]> {
-      return texts
     }
   }
 
@@ -320,25 +331,69 @@ export module Screens {
       super(['text', 'content-desc'])
     }
 
+    /**
+     * Android searches the descendants of each button for some text.
+     *
+     * In terms of data operations, this process can be thought of as a join using a "coalesce" operator.
+     *
+     * List all the descendants of each button in turn, and get the text attributes, this uses an indexed selector.
+     * For the first button, because the XPath indexing starts from 1, is: (//*[@clickable='true'])[1]//*
+     * This will, in parentheses, select all the clickables, take the first and then search for all the descendants
+     * of that.
+     *
+     * To check this, using the findElements operator, $$(), the indexing is from zero.
+     *
+     * $$('//*[@clickable = "true"]')[0].getAttribute("class")
+     * 'androidx.appcompat.widget.LinearLayoutCompat'
+     *
+     * Immediate children
+     * $$('//*[@clickable = "true"]/*')[0].getAttribute("class")
+     * 'android.widget.ImageView'
+     *
+     * All descendants
+     * $$('//*[@clickable = "true"]//*')[0].getAttribute("class")
+     * 'android.widget.ImageView'
+     *
+     * It might be possible to detail the XPath with this (//*[@clickable='true'])[1]//*[@text!='']
+     * There would then not be any null entries. I haven't tried this.
+     *
+     * This implementation uses the functional programming paradigm. A transpose method is used, it may
+     * not be very performant.
+     *
+     * The function that is needed is a column join. To do that, transpose([col1, col2]) gives a sequence of rows where
+     * row[i] = [ col1[i], col2[i] ]
+     * @param texts
+     * @param selector0
+     */
     override async specialize(texts: string[], selector0: string): Promise<string[]> {
-      // * Find those that have no text (zero length), get their indices and build a child node selector string
-      // for each of them. (Try to minimize the remote access.)
-      // Submit that string, collate the results
-      const texts1 = indexed(texts, 0)
+      // Only process the buttons that don't have text, because it is computationally expensive to process them all.
+      // This means we have to process a subset, and return their values to the set.
+      // This will need some indirect addressing, so we capture the indices of the blank texts in xtext1idx.
 
-      const xtext1idx = texts1.filter((t) => t[1].length == 0).map((t) => t[0])
+      // I use this functional pair for pipelines when list processing: it makes the implementation more efficient
+      let out0 = null; let in0 = null
+
+      out0 = indexed(texts, 0); in0 = out0 // index the texts by row number.
+      // find the blanks, and remember their indices for the join later.
+      const xtext1idx = in0.filter((t) => t[1].length == 0).map((t) => t[0])
+      // if there are no empty text strings, no need to do anything
+      if (xtext1idx.length == 0) return texts
+
+      // create the indexed XPath selector, add one to the index in xtext1idx because XPath indexes from 1 not 0.
       const fToSelect = (i: number) => `(${selector0})[${i}]//*`
-      const xtexts1s = xtext1idx.map((i: number) => fToSelect(i + 1))
+      out0 = xtext1idx.map((i: number) => fToSelect(i + 1)); in0 = out0
 
-      // For each of those search strings, fetch and collate the tags and reduce it to one string.
-      const xtexts1 = xtexts1s.map(async (col: string) => await this.collate(col, this.tags));
-      const xtexts2 = await Promise.all(xtexts1)
-      const xtexts3 = xtexts2.map((x: string[]) => reducer(x).trim())
+      // For each of those search strings, fetch and collate the attributes and reduce them to one string.
+      out0 = in0.map(async (selector0: string) => await this.collate(selector0, this.tags)); in0 = out0
+      out0 = await Promise.all(in0); in0 = out0
+      out0 = in0.map((x: string[]) => reducer(x).trim()); in0 = out0
 
       // Put the new values back, using indirect addressing into the array.
-      const xtexts4 = transpose([xtext1idx, xtexts3])
+      // Use a column join to map indices to the text strings.
+      // And iterate through those to assign the new values to the original.
+      out0 = transpose([xtext1idx, in0]); in0 = out0
 
-      xtexts4.forEach((t) => {
+      in0.forEach((t) => {
         const idx = t[0]
         texts[idx] = t[1]
       })
