@@ -65,7 +65,7 @@ export const config: WebdriverIO.Config = {
   // - @wdio/cli, @wdio/config, @wdio/utils
   // Level of logging verbosity: trace | debug | info | warn | error | silent
   logLevel: 'warn',
-  // logLevels: { 
+  // logLevels: {
   //     webdriver: 'debug',
   //     webdriverio: 'debug',
   // },
@@ -152,7 +152,7 @@ export const config: WebdriverIO.Config = {
   before(capabilities, specs, browser: any) {
 
     // browser commands that return Promise don't return a typed object.
-    // I have tried, JSON.stringify()
+    // I have tried these: Promise.all().then(), JSON.stringify()
 
     browser.addCommand('actions0', async function (stringToSend: string) {
       await AppScreen.perform0(stringToSend) // sends a string using performActions
@@ -167,7 +167,9 @@ export const config: WebdriverIO.Config = {
       return hashCode
     })
     browser.addCommand('clickables', async (): Promise<string[]> => {
-      const m0 = await SingletonScreen.instance.listButtons() // lists available buttons
+      // This lists available buttons as indexed from 0 to N
+      // A numbered prefix is prepended to make each text string match a $$() invocation on the same page.
+      const m0 = await SingletonScreen.instance.listButtons()
       const v0 = [...m0.keys()]
       return [...Array(v0.length).keys()].map((i: number): string =>
         i.toString().padStart(2, '0') + " - " + v0[i])

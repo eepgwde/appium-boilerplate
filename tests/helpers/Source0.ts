@@ -136,15 +136,20 @@ export module Local {
   }
 
   export class Source0 {
+    set isScreenShot(value: boolean) {
+      this._isScreenShot = value;
+    }
     private readonly destDir: string;
     private readonly useTempFile: boolean;
     private readonly prefix: string;
     private readonly postfix: string;
+    private _isScreenShot: boolean;
 
-    constructor(destDir: string = "pages",
-                        prefix: string = "w",
-                        postfix: string = ".xml",
-                        useTempFile: boolean = false) {
+    constructor(destDir: string = Site0.Source0.destDir,
+                        prefix: string = Site0.Source0.prefix,
+                        postfix: string = Site0.Source0.postfix,
+                        useTempFile: boolean = Site0.Source0.useTempFile,
+                        isScreenShot: boolean = Site0.Source0.isScreenShot) {
       if (!fs.existsSync(destDir, {recursive: true})) {
         fs.mkdirSync(destDir, {recursive: true})
       }
@@ -152,6 +157,7 @@ export module Local {
       this.postfix = postfix
       this.destDir = destDir
       this.useTempFile = useTempFile
+      this._isScreenShot = isScreenShot
       Source0._instance = this
     }
 
@@ -186,7 +192,7 @@ export module Local {
      */
     async dump(signature: string, name: string = "unnamed") {
       // Update the session-id
-      const sid = browser.sessionId.toString().replace('_', '');
+      const sid = browser.sessionId.toString().replace('-', '');
       fs.writeFile("session.json-id", sid, function (err: any) {
         if (err) throw err;
         log.info('session-id');
@@ -210,7 +216,7 @@ export module Local {
       });
 
       // Take an image - now storing directly to file.
-      if (Site0.isScreenShot) {
+      if (this._isScreenShot) {
         try {
           const p0 = path.join(".", this.destDir, this.prefix + page.xhashCode + ".png")
           if (typeof p0 === "string") {
@@ -225,7 +231,6 @@ export module Local {
 
       if (this.useTempFile) { // not used.+
         const nm = tmp.fileSync({mode: 0o664, prefix: this.prefix, postfix: this.postfix, tmpdir: this.destDir});
-        log.info("nm.name: " + nm.name)
         fs.writeFile(nm.name, page.src, function (err: any) {
           if (err) {
             log.warn('save-rnd: + ' + p0);

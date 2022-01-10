@@ -1,6 +1,8 @@
 import {Local} from "../helpers/Source0";
 import AppScreen from './AppScreen';
 
+import {Site0} from '../../config/wdio.shared.local.appium.conf'
+
 /**
  * Provides for Screens.
  *
@@ -126,7 +128,7 @@ export module Screens {
   // Transpose columns to rows
   //
   // This is a difficult implementation to understand. It makes use of a feature of map() that provides the index.
-  // It is used here, just for the index of the item in the row.
+  // It is used here, just for the index of the "item" in the row.
   // https://stackoverflow.com/questions/17428587/transposing-a-2d-array-in-javascript
   const transpose = (matrix: any[][]) => {
     const x0 = matrix.reduce((prev, next) =>
@@ -142,7 +144,7 @@ export module Screens {
    * @param list an array
    * @param offset array indexing starts at 0 by default, other systems may use 1.
    */
-  const indexed0 = (list: any[], offset: number = 0) => list.map( (item:any, i:number) => [ i+offset, item])
+  const indexed0 = (list: any[], offset: number = 0) => list.map( (item:any, i:number) => [ i+offset, item ])
 
   /**
    * Prepends the elements of the list with the element's index in the list.
@@ -271,33 +273,38 @@ export module Screens {
      * After specialize(), if there is still no string, then give it a numbered string.
      * After that, rename any duplicates. Then construct a map for the caller.
      *
+     * Note: out1 = f(in0) is a pipeline notation I use. After each stage of the pipeline, I set in0 = out1 for the
+     * next stage.
+     *
      * @param selector0
      * @protected
      */
     public async listButtons(selector0: string = this.buttons): Promise<Map<string, WebdriverIO.Element>> {
-      const t0 = await $$(selector0);
+      const buttons = await $$(selector0);
+
+      let in0 = null; let out1 = null
 
       // texts0: text fields for buttons so far
-      let texts0 = await this.collate(selector0, this.tags)
+      out1 = await this.collate(selector0, this.tags); in0 = out1
 
       // the specialization usually deals with blank strings, but it might do other formatting, so don't test
       // for empty fields at this level.
-      texts0 = await this.specialize(texts0, selector0)
+      out1 = await this.specialize(in0, selector0); in0 = out1
 
       // Any remaining blanks we fill with a padded string
-      const texts2 = addDefaults(texts0, indexedStrings)
+      out1 = addDefaults(in0, indexedStrings); in0 = out1
 
       // Duplicate keys
-      const texts4 = XDuplications.makeUnique(texts2)
+      out1 = XDuplications.makeUnique(in0); in0 = out1
 
       // Convert to a Map.
-      const texts5 = transpose([texts4, t0])
-      const v2 = await this.listButtons0() // provides an empty map
-      texts5.forEach((t) => v2.set(t[0], t[1]))
+      out1 = transpose([in0, buttons]); in0 = out1
+      const result = await this.listButtons0() // provides an empty map
+      in0.forEach((txt) => result.set(txt[0], txt[1]))
       // this spots the duplicates
-      super.log.debug("listButtons: count: " + t0.length + "; " + v2.size + "; " + texts5.length)
+      super.log.debug("listButtons: count: " + buttons.length + "; " + result.size + "; " + in0.length)
 
-      return v2
+      return result
     }
 
     protected async specialize(texts: string[], selector0: string): Promise<string[]> {
@@ -317,7 +324,7 @@ export module Screens {
    */
   class iOSScreen extends SingletonScreen {
     constructor() {
-      super(['name', 'label'])
+      super(Site0.SingletonScreen.iOSAttrs)
     }
   }
 
@@ -328,7 +335,7 @@ export module Screens {
    */
   class AndroidScreen extends SingletonScreen {
     constructor() {
-      super(['text', 'content-desc'])
+      super(Site0.SingletonScreen.androidAttrs)
     }
 
     /**
@@ -362,37 +369,46 @@ export module Screens {
      *
      * The function that is needed is a column join. To do that, transpose([col1, col2]) gives a sequence of rows where
      * row[i] = [ col1[i], col2[i] ]
+     *
+     * Only process the buttons that don't have text, because it is computationally expensive to process them all.
+     * This means we have to process a subset, and return their values to the set.
+     * This will need some indirect addressing, so we capture the indices of the blank texts in xtext1idx.
+     *
+     * Note:
+     * I use a pair of real variables, in0 and out0, as a pair of free variables for pipelines when list processing.
+     * It makes the implementation more efficient, and when the receiving variable is not out0, then it is
+     * clear that the receiving variable will be used later.
+     *
+     * It does make it harder to debug the function.
+     *
+     * But, notice that after each stage of the pipeline, set in0 = out0 on the *same line*.
+     *
      * @param texts
      * @param selector0
      */
     override async specialize(texts: string[], selector0: string): Promise<string[]> {
-      // Only process the buttons that don't have text, because it is computationally expensive to process them all.
-      // This means we have to process a subset, and return their values to the set.
-      // This will need some indirect addressing, so we capture the indices of the blank texts in xtext1idx.
+      // pipeline variables
+      let out1 = null; let in0 = null
 
-      // I use this functional pair for pipelines when list processing: it makes the implementation more efficient
-      let out0 = null; let in0 = null
-
-      out0 = indexed(texts, 0); in0 = out0 // index the texts by row number.
+      out1 = indexed(texts, 0); in0 = out1 // index the texts by row number.
       // find the blanks, and remember their indices for the join later.
-      const xtext1idx = in0.filter((t) => t[1].length == 0).map((t) => t[0])
+      const xIdx = in0.filter((t) => t[1].length == 0).map((t) => t[0])
       // if there are no empty text strings, no need to do anything
-      if (xtext1idx.length == 0) return texts
+      if (xIdx.length == 0) return texts
 
-      // create the indexed XPath selector, add one to the index in xtext1idx because XPath indexes from 1 not 0.
+      // create the indexed XPath selector, add one to the index in xIdx because XPath indices start at 1 not 0.
       const fToSelect = (i: number) => `(${selector0})[${i}]//*`
-      out0 = xtext1idx.map((i: number) => fToSelect(i + 1)); in0 = out0
+      out1 = xIdx.map((i: number) => fToSelect(i + 1)); in0 = out1
 
       // For each of those search strings, fetch and collate the attributes and reduce them to one string.
-      out0 = in0.map(async (selector0: string) => await this.collate(selector0, this.tags)); in0 = out0
-      out0 = await Promise.all(in0); in0 = out0
-      out0 = in0.map((x: string[]) => reducer(x).trim()); in0 = out0
+      out1 = in0.map(async (selector0: string) => await this.collate(selector0, this.tags)); in0 = out1
+      out1 = await Promise.all(in0); in0 = out1
+      out1 = in0.map((x: string[]) => reducer(x).trim()); in0 = out1
 
       // Put the new values back, using indirect addressing into the array.
       // Use a column join to map indices to the text strings.
       // And iterate through those to assign the new values to the original.
-      out0 = transpose([xtext1idx, in0]); in0 = out0
-
+      out1 = transpose([xIdx, in0]); in0 = out1
       in0.forEach((t) => {
         const idx = t[0]
         texts[idx] = t[1]

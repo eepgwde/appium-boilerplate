@@ -18,6 +18,19 @@ export default config;
 // weaves
 // Local Test Configuration
 export module Site0 {
-  // weaves : some problems with screenshot, so it can be switched off here.
-  export const isScreenShot: boolean = false
+
+  // The attributes that should contain text
+  export const SingletonScreen = {
+    androidAttrs: ['text', 'content-desc'],
+    iOSAttrs: ['name', 'label'],
+  }
+
+  // Configuration for the Source0 singleton object.
+  export const Source0 = {
+    destDir: 'pages',
+    useTempFile: false,
+    prefix: 'w',
+    postfix: '.xml',
+    isScreenShot: false,
+  }
 }
