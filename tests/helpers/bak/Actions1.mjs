@@ -42,3 +42,8 @@ console.log(JSON.stringify(b0))
 
 console.log(JSON.stringify(transpose([b0, s0])))
 
+m0.map( (row, i) => console.log(i))
+
+
+console.log(s0.map( (item, i) => [i, item]))
+
